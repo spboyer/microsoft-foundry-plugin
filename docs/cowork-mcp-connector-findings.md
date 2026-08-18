@@ -464,14 +464,29 @@ page offers a **Request approval** button. If it only offers "Have an admin acco
 in with that account", the workflow is disabled and you must route the request through
 your organization's normal process.
 
-### The better long-term fix
+### Two independent ways out
 
-The consent wall exists because every plugin author registers their own Entra client for a
-first-party Microsoft API. If the Foundry MCP team added the M365 Copilot / Cowork
-connector client to the resource app's `preAuthorizedApplications`, plugin authors would
-need no custom app registration and no admin consent at all — the same treatment the Azure
-CLI already receives. That is a product ask for the Foundry MCP team, not something a
-plugin author can solve.
+**1. Your tenant admin grants consent** for your client. Unblocks you; every future author
+repeats it.
+
+**2. The Foundry MCP team pre-authorizes your client.** `preAuthorizedApplications` waives
+consent outright, so this needs no involvement from your tenant admin at all. Note the
+resource app registration lives in tenant `f8cdef31-a31e-4b4a-93e4-5f571e91255a`
+(Microsoft first-party services), not in `microsoft.com` — `az ad app show` against it
+fails from a corp tenant because only the service principal is visible locally. Nobody
+outside the Foundry team can make this change, regardless of their own tenant rights.
+
+### On the "just pre-authorize Cowork" idea
+
+Tempting, but it does not work under the current model, and an earlier draft of this
+document was wrong to suggest it. `preAuthorizedApplications` is keyed to **specific client
+app IDs**, and `OAuthPluginVault` requires every author to supply their own client ID.
+There is no shared Cowork client to add to the list.
+
+Pre-authorization only becomes a general fix if P5c lands: with `microsoftEntra` auth there
+would be a single first-party Cowork client, which the Foundry team could pre-authorize
+once for every author forever. Until then, option 2 is per-author and does not scale — it
+is a fast unblock, not a solution.
 
 ---
 
