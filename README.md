@@ -1,4 +1,4 @@
-# Microsoft Foundry Plugin
+# Microsoft Foundry
 
 A focused Microsoft 365 Copilot plugin containing only the
 `microsoft-foundry` skills from

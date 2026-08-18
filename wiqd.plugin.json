@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "name": "Microsoft Foundry Plugin",
+  "name": "Microsoft Foundry",
   "capabilities": [
     "agentSkills",
     "agentConnectors"
