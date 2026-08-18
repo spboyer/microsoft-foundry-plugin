@@ -1,0 +1,3580 @@
+{
+  "tools": [
+    {
+      "name": "agent_container_control",
+      "description": "Manages hosted agent container lifecycle. Use 'start' to start the container before invoking, 'stop' to stop it. To check container status, use 'agent_container_status' tool. To send messages to the agent, use 'agent_invoke' tool.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "projectEndpoint": {
+            "description": "Microsoft Foundry Project endpoint. Format: 'https://{account}.services.ai.azure.com/api/projects/{project}'.",
+            "type": "string",
+            "format": "uri"
+          },
+          "agentName": {
+            "description": "Name of the hosted agent.",
+            "type": "string"
+          },
+          "action": {
+            "description": "Action to perform on the container. Valid values: 'start' (start container), 'stop' (stop container). To check status, use 'agent_container_status' tool. To invoke the agent, use 'agent_invoke' tool.",
+            "type": "string"
+          },
+          "agentVersion": {
+            "description": "Optional version of the agent. If not specified, the latest version will be used. Examples: '1', '2', '3'.",
+            "type": "string",
+            "default": null
+          },
+          "minReplicas": {
+            "description": "[start only] The minimum number of container replicas to run. Defaults to 1.",
+            "type": "integer",
+            "default": 1
+          },
+          "maxReplicas": {
+            "description": "[start only] The maximum number of container replicas to run. Defaults to 1.",
+            "type": "integer",
+            "default": 1
+          }
+        },
+        "required": [
+          "projectEndpoint",
+          "agentName",
+          "action"
+        ]
+      },
+      "annotations": {
+        "readOnlyHint": false
+      }
+    },
+    {
+      "name": "agent_container_status_get",
+      "description": "Gets the current status of a hosted agent container. Use this to check if the container is running, starting, stopped, or in another state. Returns status values: Starting, Running, Stopping, Stopped, Failed, Deleting, Deleted, or Updating.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "projectEndpoint": {
+            "description": "Microsoft Foundry Project endpoint. Format: 'https://{account}.services.ai.azure.com/api/projects/{project}'.",
+            "type": "string",
+            "format": "uri"
+          },
+          "agentName": {
+            "description": "Name of the hosted agent.",
+            "type": "string"
+          },
+          "agentVersion": {
+            "description": "Optional version of the agent. If not specified, the latest version will be used. Examples: '1', '2', '3'.",
+            "type": "string",
+            "default": null
+          }
+        },
+        "required": [
+          "projectEndpoint",
+          "agentName"
+        ]
+      },
+      "annotations": {
+        "readOnlyHint": true
+      }
+    },
+    {
+      "name": "agent_definition_schema_get",
+      "description": "Returns the complete JSON schema for agent definitions including all tool types. Essential for understanding the full structure before creating or updating agents.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "schemaType": {
+            "description": "The type of schema to retrieve: 'prompt' for PromptAgentDefinition, 'hosted' for ImageBasedHostedAgentDefinition, 'tools' for all tool types, or 'all' for complete schema.",
+            "type": "string",
+            "default": "all"
+          }
+        }
+      },
+      "annotations": {
+        "readOnlyHint": true
+      }
+    },
+    {
+      "name": "agent_delete",
+      "description": "Permanently deletes an agent from an Microsoft Foundry Project. For hosted agents, this automatically deletes the container first before deleting the agent. WARNING: This action cannot be undone. Use 'agent_container' with action='stop' instead if you only want to stop a running container without deleting the agent.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "projectEndpoint": {
+            "description": "Microsoft Foundry Project endpoint. Format: 'https://{account}.services.ai.azure.com/api/projects/{project}'.",
+            "type": "string",
+            "format": "uri"
+          },
+          "agentName": {
+            "description": "Agent name to delete.",
+            "type": "string"
+          }
+        },
+        "required": [
+          "projectEndpoint",
+          "agentName"
+        ]
+      },
+      "annotations": {
+        "readOnlyHint": false
+      }
+    },
+    {
+      "name": "agent_get",
+      "description": "List all agents in a Microsoft Foundry Project, or get a specific agent if an agent name is provided.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "projectEndpoint": {
+            "description": "Microsoft Foundry Project endpoint. Format: 'https://{account}.services.ai.azure.com/api/projects/{project}'.",
+            "type": "string",
+            "format": "uri"
+          },
+          "agentName": {
+            "description": "Optional name of an agent to retrieve. If null or empty, lists all agents on the project.",
+            "type": "string",
+            "default": null
+          }
+        },
+        "required": [
+          "projectEndpoint"
+        ]
+      },
+      "annotations": {
+        "readOnlyHint": true
+      }
+    },
+    {
+      "name": "agent_invoke",
+      "description": "Sends a message to an agent and gets a response. For hosted agents, automatically determines the correct protocol (responses or invocations) based on the agent's container_protocol_versions and uses endpoint-scoped routes. For prompt agents, uses the legacy responses path. You can explicitly specify a protocol to use; if not specified, it is auto-detected from the agent definition.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "projectEndpoint": {
+            "description": "Microsoft Foundry Project endpoint. Format: 'https://{account}.services.ai.azure.com/api/projects/{project}'.",
+            "type": "string",
+            "format": "uri"
+          },
+          "agentName": {
+            "description": "Name of the agent to invoke.",
+            "type": "string"
+          },
+          "inputText": {
+            "description": "The message text to send to the agent.",
+            "type": "string"
+          },
+          "protocol": {
+            "description": "Optional protocol to use for invocation: 'responses' or 'invocations'. If not specified, auto-detects from the agent's container_protocol_versions. If the agent supports only one protocol, that is used automatically.",
+            "type": "string",
+            "default": null
+          },
+          "agentVersion": {
+            "description": "Optional version of the agent. If not specified, the latest version will be used. Examples: '1', '2', '3'. For hosted agents using endpoint-scoped routes, version is auto-resolved.",
+            "type": "string",
+            "default": null
+          },
+          "conversationId": {
+            "description": "Optional conversation ID for multi-turn conversations (responses protocol only).",
+            "type": "string",
+            "default": null
+          },
+          "sessionId": {
+            "description": "Optional session ID for hosted agent sessions.",
+            "type": "string",
+            "default": null
+          },
+          "stream": {
+            "description": "Whether to use streaming for the agent response (responses protocol only). Defaults to false.",
+            "type": "boolean",
+            "default": false
+          },
+          "useEndpoint": {
+            "description": "Set to true to use endpoint-scoped routes for hosted agents (auto-detects protocol). Defaults to true for hosted agents.",
+            "type": "boolean",
+            "default": true
+          }
+        },
+        "required": [
+          "projectEndpoint",
+          "agentName",
+          "inputText"
+        ]
+      },
+      "annotations": {
+        "readOnlyHint": false
+      }
+    },
+    {
+      "name": "agent_update",
+      "description": "Creates, updates, or clones an agent in an Microsoft Foundry Project, returning the serialized AgentRecord of the updated agent as a string. Use 'agent_definition_schema_get' tool to discover the complete schema for agent definitions.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "projectEndpoint": {
+            "description": "Microsoft Foundry Project endpoint. Format: 'https://{account}.services.ai.azure.com/api/projects/{project}'.",
+            "type": "string",
+            "format": "uri"
+          },
+          "agentName": {
+            "description": "Agent name on which to operate. This should be the desired new name if creating a new agent or cloning an existing one.",
+            "type": "string"
+          },
+          "agentDefinition": {
+            "description": "JSON definition for creating or updating an agent. Must include 'kind' property: 'prompt' for LLM-powered agents (requires 'model'), 'hosted' for container-based agents (requires 'image', 'cpu', 'memory', 'container_protocol_versions'). Use 'agent_definition_schema_get' tool to discover the complete schema.",
+            "default": null
+          },
+          "isCloneRequest": {
+            "description": "Optional parameter to indicate whether this is a clone request. Defaults to false.",
+            "type": "boolean",
+            "default": false
+          },
+          "cloneTargetAgentName": {
+            "description": "Optional parameter specifying the name of the agent to clone from, required if isCloneRequest is true.",
+            "type": "string",
+            "default": null
+          },
+          "modelName": {
+            "description": "Optional parameter specifying the model to switch to when cloning an agent.",
+            "type": "string",
+            "default": null
+          },
+          "creationOptions": {
+            "description": "Optional creation options for the agent as JSON, including description and metadata.",
+            "default": null
+          }
+        },
+        "required": [
+          "projectEndpoint",
+          "agentName"
+        ]
+      },
+      "annotations": {
+        "readOnlyHint": false
+      }
+    },
+    {
+      "name": "continuous_eval_create",
+      "description": "Enable or update continuous evaluation for an agent. Auto-detects agent kind and configures the appropriate evaluation mechanism. Creates the evaluation group if needed.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "projectEndpoint": {
+            "description": "Azure AI Project endpoint. Format: 'https://{account}.services.ai.azure.com/api/projects/{project}'.",
+            "type": "string",
+            "format": "uri"
+          },
+          "agentName": {
+            "description": "Name of the agent to evaluate.",
+            "type": "string"
+          },
+          "evaluatorNames": {
+            "description": "List of evaluator names. Built-in: coherence, fluency, relevance, groundedness, intent_resolution, task_adherence, tool_call_accuracy, violence, sexual, self_harm, hate_unfairness, indirect_attack, code_vulnerability, protected_material.",
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "deploymentName": {
+            "description": "Model deployment name for LLM-judge evaluators (e.g., 'gpt-4o'). Required for quality evaluators.",
+            "type": "string",
+            "default": null
+          },
+          "enabled": {
+            "description": "Whether continuous evaluation is enabled. Default: true.",
+            "type": "boolean",
+            "default": true
+          },
+          "intervalHours": {
+            "description": "Interval in hours between evaluation runs (hosted agents only). Default: 1.",
+            "type": "integer",
+            "default": 1
+          },
+          "maxTraces": {
+            "description": "Max data points per evaluation run (hosted agents only). Default: 1000.",
+            "type": "integer",
+            "default": 1000
+          },
+          "samplingRate": {
+            "description": "Percentage of responses to evaluate, 1-100 (prompt/workflow agents only). Default: all.",
+            "type": [
+              "number",
+              "null"
+            ],
+            "default": null
+          },
+          "maxHourlyRuns": {
+            "description": "Max evaluation runs per hour (prompt/workflow agents only).",
+            "type": [
+              "integer",
+              "null"
+            ],
+            "default": null
+          },
+          "scenario": {
+            "description": "Evaluation scenario: 'standard' or 'business'. Multiple scenarios can coexist per agent. Default: 'standard'.",
+            "type": "string",
+            "default": null
+          }
+        },
+        "required": [
+          "projectEndpoint",
+          "agentName",
+          "evaluatorNames"
+        ]
+      }
+    },
+    {
+      "name": "continuous_eval_delete",
+      "description": "Delete continuous evaluation configuration for an agent.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "projectEndpoint": {
+            "description": "Azure AI Project endpoint.",
+            "type": "string",
+            "format": "uri"
+          },
+          "configId": {
+            "description": "ID of the continuous evaluation configuration to delete. Use 'continuous_eval_get' to find IDs.",
+            "type": "string"
+          },
+          "agentName": {
+            "description": "Agent name.",
+            "type": "string"
+          }
+        },
+        "required": [
+          "projectEndpoint",
+          "configId",
+          "agentName"
+        ]
+      }
+    },
+    {
+      "name": "continuous_eval_get",
+      "description": "Get continuous evaluation configuration for an agent.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "projectEndpoint": {
+            "description": "Azure AI Project endpoint.",
+            "type": "string",
+            "format": "uri"
+          },
+          "agentName": {
+            "description": "Agent name to get continuous evaluation configuration for.",
+            "type": "string"
+          },
+          "scenario": {
+            "description": "Optional scenario filter ('standard' or 'business'). Does not apply to hosted agents.",
+            "type": "string",
+            "default": null
+          }
+        },
+        "required": [
+          "projectEndpoint",
+          "agentName"
+        ]
+      },
+      "annotations": {
+        "readOnlyHint": true
+      }
+    },
+    {
+      "name": "data_generation_job_cancel",
+      "description": "Cancels a data generation job.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "projectEndpoint": {
+            "type": "string",
+            "format": "uri"
+          },
+          "jobId": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "projectEndpoint",
+          "jobId"
+        ]
+      },
+      "annotations": {
+        "readOnlyHint": false
+      }
+    },
+    {
+      "name": "data_generation_job_create",
+      "description": "Starts a standalone data generation job for evaluation or fine-tuning data.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "projectEndpoint": {
+            "type": "string",
+            "format": "uri"
+          },
+          "jobName": {
+            "type": "string"
+          },
+          "generationType": {
+            "type": "string",
+            "default": "simple_qna"
+          },
+          "scenario": {
+            "type": "string",
+            "default": "evaluation"
+          },
+          "maxSamples": {
+            "type": "integer",
+            "default": 100
+          },
+          "generationModelDeploymentName": {
+            "type": "string",
+            "default": null
+          },
+          "trainSplit": {
+            "type": [
+              "number",
+              "null"
+            ],
+            "default": null
+          },
+          "questionTypes": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "default": null
+          },
+          "promptSource": {
+            "type": "string",
+            "default": null
+          },
+          "promptSourceDescription": {
+            "type": "string",
+            "default": null
+          },
+          "agentName": {
+            "type": "string",
+            "default": null
+          },
+          "agentVersion": {
+            "type": "string",
+            "default": null
+          },
+          "agentSourceDescription": {
+            "type": "string",
+            "default": null
+          },
+          "traceAgentName": {
+            "type": "string",
+            "default": null
+          },
+          "traceAgentVersion": {
+            "type": "string",
+            "default": null
+          },
+          "traceAgentId": {
+            "type": "string",
+            "default": null
+          },
+          "traceStartTime": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "default": null
+          },
+          "traceEndTime": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "default": null
+          },
+          "maxTraces": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "default": null
+          },
+          "tracesSourceDescription": {
+            "type": "string",
+            "default": null
+          },
+          "datasetName": {
+            "type": "string",
+            "default": null
+          },
+          "datasetVersion": {
+            "type": "string",
+            "default": null
+          },
+          "datasetSourceDescription": {
+            "type": "string",
+            "default": null
+          },
+          "fileId": {
+            "type": "string",
+            "default": null
+          },
+          "fileSourceDescription": {
+            "type": "string",
+            "default": null
+          }
+        },
+        "required": [
+          "projectEndpoint",
+          "jobName"
+        ]
+      },
+      "annotations": {
+        "readOnlyHint": false
+      }
+    },
+    {
+      "name": "data_generation_job_delete",
+      "description": "Deletes a data generation job.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "projectEndpoint": {
+            "type": "string",
+            "format": "uri"
+          },
+          "jobId": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "projectEndpoint",
+          "jobId"
+        ]
+      },
+      "annotations": {
+        "readOnlyHint": false
+      }
+    },
+    {
+      "name": "data_generation_job_get",
+      "description": "Gets one data generation job by ID, or lists data generation jobs when jobId is omitted.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "projectEndpoint": {
+            "type": "string",
+            "format": "uri"
+          },
+          "jobId": {
+            "type": "string",
+            "default": null
+          }
+        },
+        "required": [
+          "projectEndpoint"
+        ]
+      },
+      "annotations": {
+        "readOnlyHint": true
+      }
+    },
+    {
+      "name": "evaluation_agent_batch_eval_create",
+      "description": "Create an agent-target batch evaluation in an Azure AI Project. This creates an evaluation (if not provided) and starts a batch evaluation run that calls the specified agent to generate completions for test queries. Set generateSyntheticData=true to auto-generate test queries using an LLM instead of providing input data. Supports built-in quality, safety, and agent/tool evaluators including task_completion, task_adherence, tool_call_accuracy, tool_call_success, tool_selection, tool_input_accuracy, and tool_output_utilization, plus custom evaluators from the project's evaluator catalog.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "projectEndpoint": {
+            "description": "Azure AI Project endpoint. Format: 'https://{account}.services.ai.azure.com/api/projects/{project}'.",
+            "type": "string",
+            "format": "uri"
+          },
+          "agentName": {
+            "description": "Name of the agent to evaluate.",
+            "type": "string"
+          },
+          "agentVersion": {
+            "description": "Version of the agent to evaluate.",
+            "type": "string"
+          },
+          "evaluatorNames": {
+            "description": "List of evaluator names to use. Built-ins include coherence, fluency, relevance, groundedness, intent_resolution, task_adherence, task_completion, tool_call_accuracy, tool_call_success, tool_selection, tool_input_accuracy, tool_output_utilization, violence, sexual, self_harm, hate_unfairness, indirect_attack, code_vulnerability, protected_material. Custom evaluators from the project's evaluator catalog are also supported by name.",
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "inputData": {
+            "description": "Input data items to evaluate. Each object must have 'query' (required). Optional fields: 'context', 'ground_truth', and any fields required by selected custom evaluators such as 'expected_behavior', 'evidence_quality', or 'reference_facts'. Not required when generateSyntheticData is true.",
+            "type": "array",
+            "items": {
+              "type": "object"
+            },
+            "default": null
+          },
+          "evaluationId": {
+            "description": "Optional existing evaluation ID. If not provided, a new evaluation will be created.",
+            "type": "string",
+            "default": null
+          },
+          "evaluationName": {
+            "description": "Optional name for the evaluation (used only when creating a new evaluation).",
+            "type": "string",
+            "default": null
+          },
+          "runName": {
+            "description": "Optional name for the evaluation run.",
+            "type": "string",
+            "default": null
+          },
+          "systemPrompt": {
+            "description": "Optional system prompt for the agent. Default: 'You are a helpful assistant.'",
+            "type": "string",
+            "default": null
+          },
+          "deploymentName": {
+            "description": "Optional model deployment name for LLM-judge evaluators (e.g., 'gpt-4o', 'gpt-4o-mini'). Required for quality evaluators like coherence, fluency, relevance, intent_resolution, task_adherence.",
+            "type": "string",
+            "default": null
+          },
+          "evaluatorThresholds": {
+            "description": "Optional thresholds for evaluators. Keys are evaluator names, values are pass thresholds (0.0-1.0). Example: {\"coherence\": 0.7, \"fluency\": 0.8}",
+            "type": "object",
+            "additionalProperties": {
+              "type": "number"
+            },
+            "default": null
+          },
+          "generateSyntheticData": {
+            "description": "When true, auto-generates test queries using an LLM instead of requiring inputData. Requires generationModelDeploymentName.",
+            "type": "boolean",
+            "default": false
+          },
+          "samplesCount": {
+            "description": "Number of synthetic test queries to generate (1-100). Only used when generateSyntheticData is true. Default: 50.",
+            "type": "integer",
+            "default": 50
+          },
+          "generationPrompt": {
+            "description": "Optional prompt to guide synthetic data generation. If omitted, the agent's instructions are used. Only used when generateSyntheticData is true.",
+            "type": "string",
+            "default": null
+          },
+          "generationModelDeploymentName": {
+            "description": "Model deployment name for generating synthetic data (e.g., 'gpt-4o'). Required when generateSyntheticData is true. Must support the 'responses' capability.",
+            "type": "string",
+            "default": null
+          },
+          "outputDatasetName": {
+            "description": "Optional name for the output dataset to store generated synthetic data. Only used when generateSyntheticData is true.",
+            "type": "string",
+            "default": null
+          }
+        },
+        "required": [
+          "projectEndpoint",
+          "agentName",
+          "agentVersion",
+          "evaluatorNames"
+        ]
+      }
+    },
+    {
+      "name": "evaluation_agent_traces_batch_eval_create",
+      "description": "Create a multi-turn conversation batch evaluation over recent traces sampled from an agent. Creates an evaluation group if evaluationId is not provided and starts an agent_filter trace-source run.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "projectEndpoint": {
+            "description": "Azure AI Project endpoint. Format: 'https://{account}.services.ai.azure.com/api/projects/{project}'.",
+            "type": "string",
+            "format": "uri"
+          },
+          "evaluatorNames": {
+            "description": "List of evaluator names. Built-in examples: customer_satisfaction, groundedness, coherence, task_completion. Custom evaluators are also supported by name.",
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "agentName": {
+            "description": "Foundry agent name. Provide with agentVersion, or provide agentId instead.",
+            "type": "string",
+            "default": null
+          },
+          "agentVersion": {
+            "description": "Foundry agent version. Provide with agentName, or provide agentId instead.",
+            "type": "string",
+            "default": null
+          },
+          "agentId": {
+            "description": "Agent ID in 'name:version' or opaque ID form. Mutually exclusive with agentName/agentVersion.",
+            "type": "string",
+            "default": null
+          },
+          "evaluationId": {
+            "description": "Optional existing evaluation ID. If not provided, a new traces evaluation group will be created.",
+            "type": "string",
+            "default": null
+          },
+          "evaluationName": {
+            "description": "Optional name for the evaluation group when creating one.",
+            "type": "string",
+            "default": null
+          },
+          "runName": {
+            "description": "Optional name for the evaluation run.",
+            "type": "string",
+            "default": null
+          },
+          "evaluationLevel": {
+            "description": "Evaluation level: 'conversation' or 'turn'. Default: 'conversation'.",
+            "type": "string",
+            "default": null
+          },
+          "deploymentName": {
+            "description": "Model deployment name for LLM-judge evaluators.",
+            "type": "string",
+            "default": null
+          },
+          "evaluatorThresholds": {
+            "description": "Optional thresholds for evaluators. Keys are evaluator names, values are pass thresholds.",
+            "type": "object",
+            "additionalProperties": {
+              "type": "number"
+            },
+            "default": null
+          },
+          "startTime": {
+            "description": "Trace query start time as Unix seconds. Defaults to now - lookbackHours.",
+            "type": [
+              "integer",
+              "null"
+            ],
+            "default": null
+          },
+          "endTime": {
+            "description": "Trace query end time as Unix seconds. Defaults to now plus padding when includeRecentTracePadding is true.",
+            "type": [
+              "integer",
+              "null"
+            ],
+            "default": null
+          },
+          "lookbackHours": {
+            "description": "Lookback window in hours when startTime is omitted. Default: 24.",
+            "type": "integer",
+            "default": 24
+          },
+          "maxTraces": {
+            "description": "Maximum number of traces to sample. Default: 5.",
+            "type": "integer",
+            "default": 5
+          },
+          "includeRecentTracePadding": {
+            "description": "When true and endTime is omitted, pads endTime by 10 minutes to avoid trace ingestion edge exclusions. Default: true.",
+            "type": "boolean",
+            "default": true
+          }
+        },
+        "required": [
+          "projectEndpoint",
+          "evaluatorNames"
+        ]
+      }
+    },
+    {
+      "name": "evaluation_comparison_create",
+      "description": "Create an Evaluation Comparison Insight in a Microsoft Foundry Project.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "projectEndpoint": {
+            "description": "Microsoft Foundry Project endpoint. Format: 'https://{account}.services.ai.azure.com/api/projects/{project}'.",
+            "type": "string",
+            "format": "uri"
+          },
+          "insightRequest": {
+            "description": "Insight Request of type EvalCompareRequest.",
+            "type": "object",
+            "properties": {
+              "request": {
+                "type": [
+                  "object",
+                  "null"
+                ],
+                "properties": {
+                  "evalId": {
+                    "type": "string"
+                  },
+                  "baselineRunId": {
+                    "type": "string"
+                  },
+                  "treatmentRunIds": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  },
+                  "type": {
+                    "type": "string",
+                    "enum": [
+                      "EvaluationRunClusterInsight",
+                      "AgentClusterInsight",
+                      "EvaluationComparison"
+                    ]
+                  }
+                }
+              },
+              "result": {
+                "type": [
+                  "object",
+                  "null"
+                ],
+                "properties": {
+                  "comparisons": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "testingCriteria": {
+                          "type": "string"
+                        },
+                        "metric": {
+                          "type": "string"
+                        },
+                        "evaluator": {
+                          "type": "string"
+                        },
+                        "baselineRunSummary": {
+                          "type": "object",
+                          "properties": {
+                            "runId": {
+                              "type": "string"
+                            },
+                            "sampleCount": {
+                              "type": "integer"
+                            },
+                            "average": {
+                              "type": "number"
+                            },
+                            "standardDeviation": {
+                              "type": "number"
+                            }
+                          }
+                        },
+                        "compareItems": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "treatmentRunSummary": {
+                                "type": "object",
+                                "properties": {
+                                  "runId": {
+                                    "type": "string"
+                                  },
+                                  "sampleCount": {
+                                    "type": "integer"
+                                  },
+                                  "average": {
+                                    "type": "number"
+                                  },
+                                  "standardDeviation": {
+                                    "type": "number"
+                                  }
+                                }
+                              },
+                              "deltaEstimate": {
+                                "type": "number"
+                              },
+                              "pValue": {
+                                "type": "number"
+                              },
+                              "treatmentEffect": {
+                                "type": "string",
+                                "enum": [
+                                  "TooFewSamples",
+                                  "Inconclusive",
+                                  "Changed",
+                                  "Improved",
+                                  "Degraded"
+                                ]
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  },
+                  "method": {
+                    "type": "string"
+                  },
+                  "type": {
+                    "type": "string",
+                    "enum": [
+                      "EvaluationRunClusterInsight",
+                      "AgentClusterInsight",
+                      "EvaluationComparison"
+                    ]
+                  },
+                  "error": {
+                    "type": [
+                      "object",
+                      "null"
+                    ],
+                    "properties": {
+                      "code": {
+                        "type": [
+                          "string",
+                          "null"
+                        ]
+                      },
+                      "message": {
+                        "type": [
+                          "string",
+                          "null"
+                        ]
+                      },
+                      "severity": {
+                        "type": [
+                          "string",
+                          "null"
+                        ],
+                        "enum": [
+                          "Error",
+                          "Warning",
+                          null
+                        ]
+                      },
+                      "correlationId": {
+                        "type": [
+                          "string",
+                          "null"
+                        ]
+                      },
+                      "target": {
+                        "type": [
+                          "string",
+                          "null"
+                        ]
+                      },
+                      "detailsUri": {
+                        "type": [
+                          "string",
+                          "null"
+                        ]
+                      },
+                      "details": {
+                        "type": [
+                          "array",
+                          "null"
+                        ],
+                        "items": {
+                          "type": "object",
+                          "properties": {
+                            "code": {
+                              "type": [
+                                "string",
+                                "null"
+                              ]
+                            },
+                            "target": {
+                              "type": [
+                                "string",
+                                "null"
+                              ]
+                            },
+                            "message": {
+                              "type": [
+                                "string",
+                                "null"
+                              ]
+                            }
+                          }
+                        }
+                      },
+                      "innerError": {
+                        "type": [
+                          "object",
+                          "null"
+                        ],
+                        "properties": {
+                          "code": {
+                            "type": [
+                              "string",
+                              "null"
+                            ]
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              },
+              "id": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "displayName": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "metadata": {
+                "type": [
+                  "object",
+                  "null"
+                ],
+                "properties": {
+                  "createdAt": {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  "completedAt": {
+                    "type": "string",
+                    "format": "date-time"
+                  }
+                }
+              },
+              "state": {
+                "type": "string",
+                "enum": [
+                  "NotStarted",
+                  "Running",
+                  "Succeeded",
+                  "Failed",
+                  "Canceled"
+                ]
+              },
+              "requestEtag": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              }
+            }
+          }
+        },
+        "required": [
+          "projectEndpoint",
+          "insightRequest"
+        ]
+      },
+      "annotations": {
+        "readOnlyHint": false
+      }
+    },
+    {
+      "name": "evaluation_comparison_get",
+      "description": "List all comparisons of evaluations within a group in the Microsoft Foundry Project. Gets a specific comparison if a valid insight identifier is provided.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "projectEndpoint": {
+            "description": "Microsoft Foundry Project endpoint. Format: 'https://{account}.services.ai.azure.com/api/projects/{project}'.",
+            "type": "string",
+            "format": "uri"
+          },
+          "insightId": {
+            "description": "Optional identifier for the Evaluation Comaprison, if not provided or empty then the tool will list all evaluation comparisons.",
+            "type": "string",
+            "default": null
+          }
+        },
+        "required": [
+          "projectEndpoint"
+        ]
+      },
+      "annotations": {
+        "readOnlyHint": true
+      }
+    },
+    {
+      "name": "evaluation_dataset_batch_eval_create",
+      "description": "Create a dataset-target batch evaluation in an Azure AI Project. This creates an evaluation (if not provided) with 'custom' data source, and starts a batch evaluation run against the provided JSONL dataset. Supports both built-in evaluators (coherence, fluency, relevance, groundedness, violence, sexual, self_harm, hate_unfairness, indirect_attack, code_vulnerability, protected_material) and custom evaluators from the project's evaluator catalog.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "projectEndpoint": {
+            "description": "Azure AI Project endpoint. Format: 'https://{account}.services.ai.azure.com/api/projects/{project}'.",
+            "type": "string",
+            "format": "uri"
+          },
+          "evaluatorNames": {
+            "description": "List of evaluator names to use. Built-in: coherence, fluency, relevance, groundedness, violence, sexual, self_harm, hate_unfairness, indirect_attack, code_vulnerability, protected_material. Custom evaluators from the project's evaluator catalog are also supported by name.",
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "evaluationId": {
+            "description": "Optional existing evaluation ID. If not provided, a new evaluation will be created.",
+            "type": "string",
+            "default": null
+          },
+          "evaluationName": {
+            "description": "Optional name for the evaluation (used only when creating a new evaluation).",
+            "type": "string",
+            "default": null
+          },
+          "runName": {
+            "description": "Optional name for the evaluation run.",
+            "type": "string",
+            "default": null
+          },
+          "datasetFileId": {
+            "description": "Optional file ID referencing a JSONL dataset. Mutually exclusive with jsonlContent.",
+            "type": "string",
+            "default": null
+          },
+          "jsonlContent": {
+            "description": "Optional inline JSONL content. Each object must have 'query' and 'response' (required). Optional fields: 'context', 'ground_truth', and any fields required by selected custom evaluators such as 'expected_behavior', 'evidence_quality', or 'reference_facts'. Example: [{\"query\": \"What is AI?\", \"response\": \"AI is...\", \"context\": \"tech domain\"}]",
+            "type": "array",
+            "items": {
+              "type": "object"
+            },
+            "default": null
+          },
+          "deploymentName": {
+            "description": "Optional model deployment name for LLM-judge evaluators (e.g., 'gpt-4o', 'gpt-4o-mini'). Required for quality evaluators like coherence, fluency, relevance.",
+            "type": "string",
+            "default": null
+          },
+          "evaluatorThresholds": {
+            "description": "Optional thresholds for evaluators. Keys are evaluator names, values are pass thresholds (0.0-1.0). Example: {\"coherence\": 0.7, \"fluency\": 0.8}",
+            "type": "object",
+            "additionalProperties": {
+              "type": "number"
+            },
+            "default": null
+          },
+          "dataKind": {
+            "description": "Data shape for the evaluation dataset. Use 'query_response' for existing behavior, or 'conversation_messages' for multi-turn rows with a messages array. Default: 'query_response'.",
+            "type": "string",
+            "default": "query_response"
+          },
+          "evaluationLevel": {
+            "description": "Evaluation level for conversation_messages dataKind: 'conversation' or 'turn'. Default: 'conversation'.",
+            "type": "string",
+            "default": null
+          },
+          "itemSchemaFields": {
+            "description": "Optional additional item schema fields for conversation_messages dataKind. Keys are field names and values are JSON schema primitive types such as 'string', 'number', 'array', or 'object'.",
+            "type": "object",
+            "additionalProperties": {
+              "type": "string"
+            },
+            "default": null
+          },
+          "includeSampleSchema": {
+            "description": "Whether to include sample schema when creating a conversation_messages evaluation group. Default: false.",
+            "type": "boolean",
+            "default": false
+          }
+        },
+        "required": [
+          "projectEndpoint",
+          "evaluatorNames"
+        ]
+      }
+    },
+    {
+      "name": "evaluation_dataset_create",
+      "description": "Create or update a dataset version in a Microsoft Foundry Project.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "projectEndpoint": {
+            "description": "Microsoft Foundry Project endpoint. Format: 'https://{account}.services.ai.azure.com/api/projects/{project}'.",
+            "type": "string",
+            "format": "uri"
+          },
+          "datasetContentUri": {
+            "description": "URI of the dataset content (e.g., Azure Blob Storage file or folder SAS URL).",
+            "type": "string",
+            "format": "uri"
+          },
+          "datasetName": {
+            "description": "Dataset name. If omitted, a name is derived from datasetContentUri.",
+            "type": "string",
+            "default": null
+          },
+          "datasetVersion": {
+            "description": "Dataset version identifier. Default: '1.0'.",
+            "type": "string",
+            "default": "1.0"
+          },
+          "datasetType": {
+            "description": "Dataset type. Allowed values: 'uri_file' | 'uri_folder'. Default: 'uri_file'.",
+            "type": "string",
+            "default": "uri_file"
+          },
+          "connectionName": {
+            "description": "The Azure Storage Account connection name. Required if a pending upload has not been started.",
+            "type": "string",
+            "default": null
+          },
+          "description": {
+            "description": "Description of the dataset.",
+            "type": "string",
+            "default": null
+          },
+          "tags": {
+            "description": "Tag dictionary. Tags can be added, removed, and updated.",
+            "type": "object",
+            "additionalProperties": {
+              "type": "string"
+            },
+            "default": null
+          }
+        },
+        "required": [
+          "projectEndpoint",
+          "datasetContentUri"
+        ]
+      }
+    },
+    {
+      "name": "evaluation_dataset_get",
+      "description": "Get a dataset by name and version in a Microsoft Foundry Project, or list all datasets in the project if no name is provided.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "projectEndpoint": {
+            "description": "Microsoft Foundry Project endpoint. Format: 'https://{account}.services.ai.azure.com/api/projects/{project}'.",
+            "type": "string",
+            "format": "uri"
+          },
+          "datasetName": {
+            "description": "Optional dataset name.",
+            "type": "string",
+            "default": null
+          },
+          "datasetVersion": {
+            "description": "Dataset version identifier. Defaults to: '1'.",
+            "type": "string",
+            "default": "1"
+          }
+        },
+        "required": [
+          "projectEndpoint"
+        ]
+      },
+      "annotations": {
+        "readOnlyHint": true
+      }
+    },
+    {
+      "name": "evaluation_dataset_sas_url_get",
+      "description": "Get a short-lived SAS URL for downloading a dataset version's content by dataset name from a Microsoft Foundry Project. Defaults to the latest dataset version.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "projectEndpoint": {
+            "description": "Microsoft Foundry Project endpoint. Format: 'https://{account}.services.ai.azure.com/api/projects/{project}'.",
+            "type": "string",
+            "format": "uri"
+          },
+          "datasetName": {
+            "description": "Dataset name to get a content SAS URL for.",
+            "type": "string"
+          },
+          "datasetVersion": {
+            "description": "Dataset version identifier. Defaults to 'latest'.",
+            "type": "string",
+            "default": "latest"
+          }
+        },
+        "required": [
+          "projectEndpoint",
+          "datasetName"
+        ]
+      },
+      "annotations": {
+        "readOnlyHint": true
+      }
+    },
+    {
+      "name": "evaluation_dataset_versions_get",
+      "description": "List all versions of a specific dataset in a Microsoft Foundry Project.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "projectEndpoint": {
+            "description": "Microsoft Foundry Project endpoint. Format: 'https://{account}.services.ai.azure.com/api/projects/{project}'.",
+            "type": "string",
+            "format": "uri"
+          },
+          "datasetName": {
+            "description": "Dataset name to list versions for.",
+            "type": "string"
+          }
+        },
+        "required": [
+          "projectEndpoint",
+          "datasetName"
+        ]
+      },
+      "annotations": {
+        "readOnlyHint": true
+      }
+    },
+    {
+      "name": "evaluation_get",
+      "description": "List evaluation groups or runs in the Microsoft Foundry Project.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "projectEndpoint": {
+            "description": "Microsoft Foundry Project endpoint. Format: 'https://{account}.services.ai.azure.com/api/projects/{project}'.",
+            "type": "string",
+            "format": "uri"
+          },
+          "isRequestForRuns": {
+            "description": "Determines request type - if true, gets or lists evaluation runs; if false, gets or lists evaluation groups. Defaults to false.",
+            "type": "boolean",
+            "default": false
+          },
+          "evalId": {
+            "description": "Optional identifier for the evaluation group to filter evaluation runs. Required for all requests where isRequestForRuns is true, and when getting singular evaluations",
+            "type": "string",
+            "default": null
+          },
+          "evalRunId": {
+            "description": "Optional identifier for the evaluation run. Required when getting singular evaluation runs.",
+            "type": "string",
+            "default": null
+          }
+        },
+        "required": [
+          "projectEndpoint"
+        ]
+      },
+      "annotations": {
+        "readOnlyHint": true
+      }
+    },
+    {
+      "name": "evaluation_suite_create",
+      "description": "Creates an evaluation suite version that can group datasets, target agents, and evaluators.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "projectEndpoint": {
+            "description": "Azure AI Project endpoint. Format: 'https://{account}.services.ai.azure.com/api/projects/{project}'.",
+            "type": "string",
+            "format": "uri"
+          },
+          "suiteName": {
+            "description": "Evaluation suite name.",
+            "type": "string"
+          },
+          "evaluatorNames": {
+            "description": "Evaluator names to include in the suite.",
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "displayName": {
+            "description": "Optional display name for the suite version.",
+            "type": "string",
+            "default": null
+          },
+          "description": {
+            "description": "Optional suite description.",
+            "type": "string",
+            "default": null
+          },
+          "datasetName": {
+            "description": "Optional dataset name to reference in the suite.",
+            "type": "string",
+            "default": null
+          },
+          "datasetVersion": {
+            "description": "Optional dataset version to reference in the suite.",
+            "type": "string",
+            "default": null
+          },
+          "targetAgentName": {
+            "description": "Optional target agent name.",
+            "type": "string",
+            "default": null
+          },
+          "targetAgentVersion": {
+            "description": "Optional target agent version.",
+            "type": "string",
+            "default": null
+          },
+          "evaluationLevel": {
+            "description": "Evaluation level for conversation_messages dataKind: 'conversation' or 'turn'.",
+            "type": "string",
+            "default": null
+          },
+          "deploymentName": {
+            "description": "Optional model deployment name for LLM-judge evaluators.",
+            "type": "string",
+            "default": null
+          },
+          "evaluatorThresholds": {
+            "description": "Optional thresholds for evaluators. Keys are evaluator names, values are pass thresholds (0.0-1.0).",
+            "type": "object",
+            "additionalProperties": {
+              "type": "number"
+            },
+            "default": null
+          },
+          "tags": {
+            "description": "Optional resource tags.",
+            "type": "object",
+            "additionalProperties": {
+              "type": "string"
+            },
+            "default": null
+          },
+          "dataKind": {
+            "description": "Data shape for the evaluation dataset. Use 'query_response' or 'conversation_messages'. Default: 'query_response'.",
+            "type": "string",
+            "default": "query_response"
+          }
+        },
+        "required": [
+          "projectEndpoint",
+          "suiteName",
+          "evaluatorNames"
+        ]
+      },
+      "annotations": {
+        "readOnlyHint": false
+      }
+    },
+    {
+      "name": "evaluation_suite_delete",
+      "description": "Deletes an evaluation suite version.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "projectEndpoint": {
+            "type": "string",
+            "format": "uri"
+          },
+          "suiteName": {
+            "type": "string"
+          },
+          "version": {
+            "type": "string",
+            "default": "latest"
+          }
+        },
+        "required": [
+          "projectEndpoint",
+          "suiteName"
+        ]
+      },
+      "annotations": {
+        "readOnlyHint": false
+      }
+    },
+    {
+      "name": "evaluation_suite_generation_job_cancel",
+      "description": "Cancels an evaluation suite generation job.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "projectEndpoint": {
+            "type": "string",
+            "format": "uri"
+          },
+          "jobId": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "projectEndpoint",
+          "jobId"
+        ]
+      },
+      "annotations": {
+        "readOnlyHint": false
+      }
+    },
+    {
+      "name": "evaluation_suite_generation_job_create",
+      "description": "Starts an evaluation suite generation job.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "projectEndpoint": {
+            "type": "string",
+            "format": "uri"
+          },
+          "suiteName": {
+            "type": "string"
+          },
+          "generationModelDeploymentName": {
+            "type": "string"
+          },
+          "category": {
+            "type": "string",
+            "default": "quality"
+          },
+          "promptSource": {
+            "type": "string",
+            "default": null
+          },
+          "promptSourceDescription": {
+            "type": "string",
+            "default": null
+          },
+          "agentSourceNames": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "default": null
+          },
+          "agentName": {
+            "type": "string",
+            "default": null
+          },
+          "agentSourceDescription": {
+            "type": "string",
+            "default": null
+          },
+          "traceAgentName": {
+            "type": "string",
+            "default": null
+          },
+          "traceAgentVersion": {
+            "type": "string",
+            "default": null
+          },
+          "traceAgentId": {
+            "type": "string",
+            "default": null
+          },
+          "traceStartTime": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "default": null
+          },
+          "traceEndTime": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "default": null
+          },
+          "maxTraces": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "default": null
+          },
+          "tracesSourceDescription": {
+            "type": "string",
+            "default": null
+          },
+          "datasetName": {
+            "type": "string",
+            "default": null
+          },
+          "datasetVersion": {
+            "type": "string",
+            "default": null
+          },
+          "datasetSourceDescription": {
+            "type": "string",
+            "default": null
+          },
+          "fileId": {
+            "type": "string",
+            "default": null
+          },
+          "fileSourceDescription": {
+            "type": "string",
+            "default": null
+          },
+          "dataGenerationType": {
+            "type": "string",
+            "default": "simple_qna"
+          },
+          "maxSamples": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "default": null
+          },
+          "deploymentName": {
+            "type": "string",
+            "default": null
+          },
+          "initializationParameters": {
+            "type": "object",
+            "default": null
+          }
+        },
+        "required": [
+          "projectEndpoint",
+          "suiteName",
+          "generationModelDeploymentName"
+        ]
+      },
+      "annotations": {
+        "readOnlyHint": false
+      }
+    },
+    {
+      "name": "evaluation_suite_generation_job_delete",
+      "description": "Deletes an evaluation suite generation job.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "projectEndpoint": {
+            "type": "string",
+            "format": "uri"
+          },
+          "jobId": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "projectEndpoint",
+          "jobId"
+        ]
+      },
+      "annotations": {
+        "readOnlyHint": false
+      }
+    },
+    {
+      "name": "evaluation_suite_generation_job_get",
+      "description": "Gets one evaluation suite generation job by ID, or lists jobs when jobId is omitted.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "projectEndpoint": {
+            "type": "string",
+            "format": "uri"
+          },
+          "jobId": {
+            "type": "string",
+            "default": null
+          },
+          "limit": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "default": null
+          },
+          "continuationToken": {
+            "type": "string",
+            "default": null
+          }
+        },
+        "required": [
+          "projectEndpoint"
+        ]
+      },
+      "annotations": {
+        "readOnlyHint": true
+      }
+    },
+    {
+      "name": "evaluation_suite_get",
+      "description": "Gets an evaluation suite version, lists versions for a suite, or lists suites when suiteName is omitted.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "projectEndpoint": {
+            "type": "string",
+            "format": "uri"
+          },
+          "suiteName": {
+            "type": "string",
+            "default": null
+          },
+          "version": {
+            "type": "string",
+            "default": null
+          },
+          "listVersions": {
+            "type": "boolean",
+            "default": false
+          },
+          "agentName": {
+            "type": "string",
+            "default": null
+          },
+          "limit": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "default": null
+          },
+          "continuationToken": {
+            "type": "string",
+            "default": null
+          }
+        },
+        "required": [
+          "projectEndpoint"
+        ]
+      },
+      "annotations": {
+        "readOnlyHint": true
+      }
+    },
+    {
+      "name": "evaluation_suite_run",
+      "description": "Starts an evaluation suite run.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "projectEndpoint": {
+            "type": "string",
+            "format": "uri"
+          },
+          "suiteName": {
+            "type": "string"
+          },
+          "evaluationName": {
+            "type": "string",
+            "default": null
+          },
+          "version": {
+            "type": "string",
+            "default": null
+          },
+          "evaluationLevel": {
+            "type": "string",
+            "default": null
+          }
+        },
+        "required": [
+          "projectEndpoint",
+          "suiteName"
+        ]
+      },
+      "annotations": {
+        "readOnlyHint": false
+      }
+    },
+    {
+      "name": "evaluation_suite_update",
+      "description": "Updates cosmetic fields on an evaluation suite version: displayName, description, and tags.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "projectEndpoint": {
+            "type": "string",
+            "format": "uri"
+          },
+          "suiteName": {
+            "type": "string"
+          },
+          "version": {
+            "type": "string"
+          },
+          "displayName": {
+            "type": "string",
+            "default": null
+          },
+          "description": {
+            "type": "string",
+            "default": null
+          },
+          "tags": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string"
+            },
+            "default": null
+          }
+        },
+        "required": [
+          "projectEndpoint",
+          "suiteName",
+          "version"
+        ]
+      },
+      "annotations": {
+        "readOnlyHint": false
+      }
+    },
+    {
+      "name": "evaluation_traces_batch_eval_create",
+      "description": "Create a multi-turn conversation batch evaluation over existing trace data selected by explicit conversation IDs or W3C trace IDs. For agent lookback/maxTraces sampling, use evaluation_agent_traces_batch_eval_create instead.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "projectEndpoint": {
+            "description": "Azure AI Project endpoint. Format: 'https://{account}.services.ai.azure.com/api/projects/{project}'.",
+            "type": "string",
+            "format": "uri"
+          },
+          "evaluatorNames": {
+            "description": "List of evaluator names. Built-in examples: customer_satisfaction, groundedness, coherence, task_completion. Custom evaluators are also supported by name.",
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "traceSourceType": {
+            "description": "Trace source selector: 'conversation_ids' or 'trace_ids'.",
+            "type": "string",
+            "default": ""
+          },
+          "conversationIds": {
+            "description": "Conversation IDs to evaluate. Required when traceSourceType is 'conversation_ids'.",
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "default": null
+          },
+          "traceIds": {
+            "description": "W3C trace IDs to evaluate. Required when traceSourceType is 'trace_ids'.",
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "default": null
+          },
+          "evaluationId": {
+            "description": "Optional existing evaluation ID. If not provided, a new traces evaluation group will be created.",
+            "type": "string",
+            "default": null
+          },
+          "evaluationName": {
+            "description": "Optional name for the evaluation group when creating one.",
+            "type": "string",
+            "default": null
+          },
+          "runName": {
+            "description": "Optional name for the evaluation run.",
+            "type": "string",
+            "default": null
+          },
+          "evaluationLevel": {
+            "description": "Evaluation level: 'conversation' or 'turn'. Default: 'conversation'.",
+            "type": "string",
+            "default": null
+          },
+          "deploymentName": {
+            "description": "Model deployment name for LLM-judge evaluators.",
+            "type": "string",
+            "default": null
+          },
+          "evaluatorThresholds": {
+            "description": "Optional thresholds for evaluators. Keys are evaluator names, values are pass thresholds.",
+            "type": "object",
+            "additionalProperties": {
+              "type": "number"
+            },
+            "default": null
+          }
+        },
+        "required": [
+          "projectEndpoint",
+          "evaluatorNames"
+        ]
+      }
+    },
+    {
+      "name": "evaluator_catalog_create",
+      "description": "Creates a custom evaluator (prompt or code type only) in the evaluator catalog. Provide either promptText (for prompt-based) or codeText (for code-based). The data_schema is auto-derived from {{variable}} template placeholders in the prompt text. Cannot create builtin, service, or openai_graders types.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "projectEndpoint": {
+            "description": "Azure AI Project endpoint. Format: 'https://{account}.services.ai.azure.com/api/projects/{project}'.",
+            "type": "string",
+            "format": "uri"
+          },
+          "name": {
+            "description": "Name for the custom evaluator.",
+            "type": "string"
+          },
+          "category": {
+            "description": "Evaluation category: 'quality', 'safety', or 'agents'.",
+            "type": "string"
+          },
+          "scoringType": {
+            "description": "Scoring/metric type: 'ordinal' (integer scale e.g. 1-5), 'continuous' (float range), or 'boolean' (true/false).",
+            "type": "string"
+          },
+          "promptText": {
+            "description": "Prompt text for a prompt-based evaluator. Use {{variable}} placeholders for input fields (e.g. {{query}}, {{response}}). Required if codeText is not provided.",
+            "type": "string",
+            "default": null
+          },
+          "codeText": {
+            "description": "Python code text for a code-based evaluator (def grade(sample, item) -> float). Required if promptText is not provided.",
+            "type": "string",
+            "default": null
+          },
+          "displayName": {
+            "description": "Display name for the evaluator. Defaults to the evaluator name.",
+            "type": "string",
+            "default": null
+          },
+          "description": {
+            "description": "Description of what the evaluator does.",
+            "type": "string",
+            "default": null
+          },
+          "metricName": {
+            "description": "Name of the metric produced by the evaluator. Defaults to 'result'.",
+            "type": "string",
+            "default": "result"
+          },
+          "minScore": {
+            "description": "Minimum score value. Defaults to 1.",
+            "type": "number",
+            "default": 1
+          },
+          "maxScore": {
+            "description": "Maximum score value. Defaults to 5.",
+            "type": "number",
+            "default": 5
+          },
+          "passThreshold": {
+            "description": "Pass/fail threshold. Scores >= this value pass. Defaults to minScore. Required at evaluation runtime for ordinal and continuous metrics.",
+            "type": [
+              "number",
+              "null"
+            ],
+            "default": null
+          },
+          "desirableDirection": {
+            "description": "Desirable direction for the metric. Options: 'increase' (higher is better), 'decrease' (lower is better), 'neutral'. Defaults to 'increase'.",
+            "type": "string",
+            "default": "increase"
+          }
+        },
+        "required": [
+          "projectEndpoint",
+          "name",
+          "category",
+          "scoringType"
+        ]
+      },
+      "annotations": {
+        "readOnlyHint": false
+      }
+    },
+    {
+      "name": "evaluator_catalog_delete",
+      "description": "Deletes a specific version of a custom evaluator from the evaluator catalog. Only custom evaluators (prompt or code type) can be deleted.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "projectEndpoint": {
+            "description": "Azure AI Project endpoint. Format: 'https://{account}.services.ai.azure.com/api/projects/{project}'.",
+            "type": "string",
+            "format": "uri"
+          },
+          "name": {
+            "description": "Name of the evaluator to delete.",
+            "type": "string"
+          },
+          "version": {
+            "description": "Version of the evaluator to delete.",
+            "type": "string"
+          }
+        },
+        "required": [
+          "projectEndpoint",
+          "name",
+          "version"
+        ]
+      },
+      "annotations": {
+        "readOnlyHint": false
+      }
+    },
+    {
+      "name": "evaluator_catalog_get",
+      "description": "Gets evaluators from the project's evaluator catalog. If 'name' is provided, returns the specific evaluator's full definition. If 'listVersions' is true with a name, lists versions for that evaluator. If 'name' is omitted, lists available evaluators filtered by type. Listing with type='all' is paginated and custom-first; use type='builtin' to discover built-ins directly.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "projectEndpoint": {
+            "description": "Azure AI Project endpoint. Format: 'https://{account}.services.ai.azure.com/api/projects/{project}'.",
+            "type": "string",
+            "format": "uri"
+          },
+          "name": {
+            "description": "Name of a specific evaluator to retrieve. If omitted, lists all evaluators.",
+            "type": "string",
+            "default": null
+          },
+          "version": {
+            "description": "Version of the evaluator. Use 'latest' (default) for the latest version. Only used when name is provided.",
+            "type": "string",
+            "default": "latest"
+          },
+          "type": {
+            "description": "Type filter for listing: 'all' (default), 'builtin', or 'custom'. Only used when name is not provided.",
+            "type": "string",
+            "default": "all"
+          },
+          "limit": {
+            "description": "Maximum number of evaluators to return when listing. Default: 20. Only used when name is not provided.",
+            "type": "integer",
+            "default": 20
+          },
+          "continuationToken": {
+            "description": "Continuation token from a previous list response. Only used when name is not provided.",
+            "type": "string",
+            "default": null
+          },
+          "listVersions": {
+            "description": "When true and name is provided, lists all versions of that evaluator instead of getting one version.",
+            "type": "boolean",
+            "default": false
+          }
+        },
+        "required": [
+          "projectEndpoint"
+        ]
+      },
+      "annotations": {
+        "readOnlyHint": true
+      }
+    },
+    {
+      "name": "evaluator_catalog_update",
+      "description": "Updates an existing custom evaluator's metadata in the evaluator catalog, or creates a new HITL-edited evaluator version when createNewVersion is true.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "projectEndpoint": {
+            "description": "Azure AI Project endpoint. Format: 'https://{account}.services.ai.azure.com/api/projects/{project}'.",
+            "type": "string",
+            "format": "uri"
+          },
+          "name": {
+            "description": "Name of the evaluator to update.",
+            "type": "string"
+          },
+          "version": {
+            "description": "Version of the evaluator to update.",
+            "type": "string",
+            "default": "latest"
+          },
+          "displayName": {
+            "description": "New display name for the evaluator.",
+            "type": "string",
+            "default": null
+          },
+          "description": {
+            "description": "New description for the evaluator.",
+            "type": "string",
+            "default": null
+          },
+          "category": {
+            "description": "New category for the evaluator (e.g. 'quality', 'safety').",
+            "type": "string",
+            "default": null
+          },
+          "createNewVersion": {
+            "description": "When true, fetches baseVersion/version, applies dimension edits, and creates a new evaluator version instead of patching metadata.",
+            "type": "boolean",
+            "default": false
+          },
+          "baseVersion": {
+            "description": "Base evaluator version to copy when createNewVersion is true. Defaults to version/latest.",
+            "type": "string",
+            "default": null
+          },
+          "dimensionWeightOverrides": {
+            "description": "Optional rubric dimension weight overrides by dimension/rubric ID for createNewVersion.",
+            "type": "object",
+            "additionalProperties": {
+              "type": "integer"
+            },
+            "default": null
+          },
+          "dimensionDescriptionOverrides": {
+            "description": "Optional rubric dimension description overrides by dimension/rubric ID for createNewVersion.",
+            "type": "object",
+            "additionalProperties": {
+              "type": "string"
+            },
+            "default": null
+          }
+        },
+        "required": [
+          "projectEndpoint",
+          "name"
+        ]
+      },
+      "annotations": {
+        "readOnlyHint": false
+      }
+    },
+    {
+      "name": "evaluator_generation_job_cancel",
+      "description": "Cancels an evaluator generation job.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "projectEndpoint": {
+            "type": "string",
+            "format": "uri"
+          },
+          "jobId": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "projectEndpoint",
+          "jobId"
+        ]
+      },
+      "annotations": {
+        "readOnlyHint": false
+      }
+    },
+    {
+      "name": "evaluator_generation_job_create",
+      "description": "Starts an adaptive evaluator generation job. To regenerate an existing evaluator, pass its evaluatorName with updated source inputs.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "projectEndpoint": {
+            "type": "string",
+            "format": "uri"
+          },
+          "modelDeploymentName": {
+            "type": "string"
+          },
+          "evaluatorName": {
+            "type": "string"
+          },
+          "evaluatorDisplayName": {
+            "type": "string",
+            "default": null
+          },
+          "evaluatorDescription": {
+            "type": "string",
+            "default": null
+          },
+          "category": {
+            "type": "string",
+            "default": "quality"
+          },
+          "promptSource": {
+            "type": "string",
+            "default": null
+          },
+          "promptSourceDescription": {
+            "type": "string",
+            "default": null
+          },
+          "agentSourceNames": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "default": null
+          },
+          "agentSourceDescription": {
+            "type": "string",
+            "default": null
+          },
+          "datasetName": {
+            "type": "string",
+            "default": null
+          },
+          "datasetVersion": {
+            "type": "string",
+            "default": null
+          },
+          "datasetSourceDescription": {
+            "type": "string",
+            "default": null
+          }
+        },
+        "required": [
+          "projectEndpoint",
+          "modelDeploymentName",
+          "evaluatorName"
+        ]
+      },
+      "annotations": {
+        "readOnlyHint": false
+      }
+    },
+    {
+      "name": "evaluator_generation_job_get",
+      "description": "Gets one evaluator generation job by ID, or lists evaluator generation jobs when jobId is omitted.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "projectEndpoint": {
+            "type": "string",
+            "format": "uri"
+          },
+          "jobId": {
+            "type": "string",
+            "default": null
+          },
+          "limit": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "default": null
+          },
+          "continuationToken": {
+            "type": "string",
+            "default": null
+          },
+          "status": {
+            "type": "string",
+            "default": null
+          },
+          "agentName": {
+            "type": "string",
+            "default": null
+          }
+        },
+        "required": [
+          "projectEndpoint"
+        ]
+      },
+      "annotations": {
+        "readOnlyHint": true
+      }
+    },
+    {
+      "name": "model_benchmark_get",
+      "description": "Fetch benchmark data for Microsoft Foundry models.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {}
+      }
+    },
+    {
+      "name": "model_benchmark_subset_get",
+      "description": "Gets benchmark data for a given pairs of model names and versions.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "foundryAccountResourceId": {
+            "type": "string"
+          },
+          "modelPairs": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "modelName": {
+                  "type": "string"
+                },
+                "modelVersion": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "modelName",
+                "modelVersion"
+              ]
+            }
+          }
+        },
+        "required": [
+          "foundryAccountResourceId",
+          "modelPairs"
+        ]
+      }
+    },
+    {
+      "name": "model_catalog_list",
+      "description": "List models from the Microsoft Foundry Model Catalog. isManagedCompute indicates that the catalog advertises Managed Compute; call model_details_get to confirm deployability.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "searchForFreePlayground": {
+            "description": "If true, filters models to include only those that can be used for free by users for prototyping.",
+            "type": "boolean",
+            "default": false
+          },
+          "publisherName": {
+            "description": "A filter to specify the publisher of the models to retrieve.",
+            "type": "string",
+            "default": ""
+          },
+          "licenseName": {
+            "description": "A filter to specify the license type of the models to retrieve.",
+            "type": "string",
+            "default": ""
+          },
+          "modelName": {
+            "description": "A filter to specify the model name to retrieve.",
+            "type": "string",
+            "default": ""
+          }
+        }
+      }
+    },
+    {
+      "name": "model_deploy",
+      "description": "DEPRECATED: use 'model_deploy_azure_direct_model' instead. Deploy an Azure Direct Model (ADM) to the specified Microsoft Foundry account. This alias is retained for backward compatibility and maps to the same behavior.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "foundryAccountResourceId": {
+            "description": "Resource ID of the Foundry account. Format: '/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.CognitiveServices/accounts/{accountName}'.",
+            "type": "string"
+          },
+          "deploymentName": {
+            "description": "Model deployment name.",
+            "type": "string"
+          },
+          "modelName": {
+            "description": "Model name.",
+            "type": "string"
+          },
+          "modelFormat": {
+            "description": "Model format.",
+            "type": "string"
+          },
+          "modelVersion": {
+            "description": "Model version.",
+            "type": "string",
+            "default": null
+          },
+          "modelSource": {
+            "description": "Model source.",
+            "type": "string",
+            "default": null
+          },
+          "skuName": {
+            "description": "SKU name.",
+            "type": "string",
+            "default": null
+          },
+          "skuCapacity": {
+            "description": "SKU capacity.",
+            "type": [
+              "integer",
+              "null"
+            ],
+            "default": null
+          },
+          "scaleType": {
+            "description": "Scale type.",
+            "type": "string",
+            "default": null
+          },
+          "scaleCapacity": {
+            "description": "Scale capacity.",
+            "type": [
+              "integer",
+              "null"
+            ],
+            "default": null
+          }
+        },
+        "required": [
+          "foundryAccountResourceId",
+          "deploymentName",
+          "modelName",
+          "modelFormat"
+        ]
+      }
+    },
+    {
+      "name": "model_deploy_azure_direct_model",
+      "description": "Deploy an Azure Direct Model (ADM) to the specified Microsoft Foundry account. Creates or updates a standard model deployment on the Foundry (CognitiveServices) account.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "foundryAccountResourceId": {
+            "description": "Resource ID of the Foundry account. Format: '/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.CognitiveServices/accounts/{accountName}'.",
+            "type": "string"
+          },
+          "deploymentName": {
+            "description": "Model deployment name.",
+            "type": "string"
+          },
+          "modelName": {
+            "description": "Model name.",
+            "type": "string"
+          },
+          "modelFormat": {
+            "description": "Model format.",
+            "type": "string"
+          },
+          "modelVersion": {
+            "description": "Model version.",
+            "type": "string",
+            "default": null
+          },
+          "modelSource": {
+            "description": "Model source.",
+            "type": "string",
+            "default": null
+          },
+          "skuName": {
+            "description": "SKU name.",
+            "type": "string",
+            "default": null
+          },
+          "skuCapacity": {
+            "description": "SKU capacity.",
+            "type": [
+              "integer",
+              "null"
+            ],
+            "default": null
+          },
+          "scaleType": {
+            "description": "Scale type.",
+            "type": "string",
+            "default": null
+          },
+          "scaleCapacity": {
+            "description": "Scale capacity.",
+            "type": [
+              "integer",
+              "null"
+            ],
+            "default": null
+          }
+        },
+        "required": [
+          "foundryAccountResourceId",
+          "deploymentName",
+          "modelName",
+          "modelFormat"
+        ]
+      }
+    },
+    {
+      "name": "model_deploy_managed_compute",
+      "description": "Deploy a model to Foundry Managed Compute (dedicated GPU) in the specified Microsoft Foundry account. Use model_catalog_list to find candidates, then confirm isFoundryManagedCompute and select a resolved deployment template from model_details_get.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "foundryAccountResourceId": {
+            "description": "Resource ID of the Foundry account. Format: '/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.CognitiveServices/accounts/{accountName}'.",
+            "type": "string"
+          },
+          "deploymentName": {
+            "description": "Model deployment name.",
+            "type": "string"
+          },
+          "modelAssetId": {
+            "description": "AzureML registry model asset URI, e.g. 'azureml://registries/azure-huggingface/models/{name}/versions/{version}' (or '.../labels/latest'). Required and immutable.",
+            "type": "string"
+          },
+          "deploymentTemplate": {
+            "description": "Deployment template asset ID (label form), e.g. 'azureml://registries/azure-huggingface/deploymenttemplates/{name}/labels/latest'. Must be a resolved deployment template returned by model_details_get.",
+            "type": "string",
+            "default": null
+          },
+          "acceleratorType": {
+            "description": "Accelerator type, e.g. 'H100_80GB'. Optional and immutable; typically implied by the deployment template.",
+            "type": "string",
+            "default": null
+          },
+          "instanceCount": {
+            "description": "Number of compute instances (SKU capacity).",
+            "type": [
+              "integer",
+              "null"
+            ],
+            "default": null
+          },
+          "versionUpgradeOption": {
+            "description": "Model version upgrade option: 'NoAutoUpgrade', 'OnceCurrentVersionExpired', or 'OnceNewDefaultVersionAvailable'.",
+            "type": "string",
+            "default": null
+          }
+        },
+        "required": [
+          "foundryAccountResourceId",
+          "deploymentName",
+          "modelAssetId"
+        ]
+      }
+    },
+    {
+      "name": "model_deployment_delete",
+      "description": "Delete a specific model deployment by name. Handles both Azure Direct Model and Foundry Managed Compute deployments (tries the Azure Direct Model resource first, then falls back to the Managed Compute resource).",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "foundryAccountResourceId": {
+            "description": "Resource ID of the Foundry account. Format: '/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.CognitiveServices/accounts/{accountName}'.",
+            "type": "string"
+          },
+          "deploymentName": {
+            "description": "Model deployment name.",
+            "type": "string"
+          }
+        },
+        "required": [
+          "foundryAccountResourceId",
+          "deploymentName"
+        ]
+      }
+    },
+    {
+      "name": "model_deployment_get",
+      "description": "Get one or more model deployments from a Microsoft Foundry account across Azure Direct Model (ADM) and Foundry Managed Compute resource types. Supply a deployment name to search both resource types and return every match, or omit it to list all deployments. Each result includes a stable kind value of 'ADM' or 'Managed' and a stable string provisioningState.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "foundryAccountResourceId": {
+            "description": "Resource ID of the Foundry account. Format: '/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.CognitiveServices/accounts/{accountName}'.",
+            "type": "string"
+          },
+          "deploymentName": {
+            "description": "Optional deployment name (not a catalog model name). If supplied, both ADM and Managed Compute resource types are searched. If omitted, all deployments are returned.",
+            "type": "string",
+            "default": null
+          }
+        },
+        "required": [
+          "foundryAccountResourceId"
+        ]
+      }
+    },
+    {
+      "name": "model_deprecation_info_get",
+      "description": "Supplies deployment info enriched with deprecation data.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "foundryAccountResourceId": {
+            "type": "string"
+          },
+          "modelDeploymentName": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "foundryAccountResourceId",
+          "modelDeploymentName"
+        ]
+      }
+    },
+    {
+      "name": "model_details_get",
+      "description": "Get full model details, resolved deployment templates, and a code sample from Microsoft Foundry. isFoundryManagedCompute is the authoritative Managed Compute deployability signal.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "modelName": {
+            "description": "The name of the model to retrieve details for.",
+            "type": "string"
+          }
+        },
+        "required": [
+          "modelName"
+        ]
+      }
+    },
+    {
+      "name": "model_monitoring_metrics_get",
+      "description": "Get monitoring metrics for a model deployment in the specified Microsoft Foundry account.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "foundryAccountResourceId": {
+            "description": "Resource ID of the Foundry account. Format: '/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.CognitiveServices/accounts/{accountName}'.",
+            "type": "string"
+          },
+          "modelDeploymentName": {
+            "description": "Model deployment name to filter metrics for.",
+            "type": "string"
+          },
+          "metricCategory": {
+            "description": "Metric group to retrieve. One of: Latency | Requests | Quota | AzureOpenAIUsage | ModelsUsage | ContentSafetyUsage | CognitiveServicesSLI. Default: ModelsUsage.",
+            "type": "string",
+            "enum": [
+              "Requests",
+              "Latency",
+              "Quota",
+              "AzureOpenAIUsage",
+              "ModelsUsage",
+              "ContentSafetyUsage",
+              "CognitiveServicesSLI"
+            ],
+            "default": "Quota"
+          }
+        },
+        "required": [
+          "foundryAccountResourceId",
+          "modelDeploymentName"
+        ]
+      }
+    },
+    {
+      "name": "model_quota_list",
+      "description": "List Azure Direct Model token quota and Foundry Managed Compute accelerator quota and usage for a subscription in a region.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "subscriptionId": {
+            "description": "Subscription ID to query.",
+            "type": "string"
+          },
+          "region": {
+            "description": "Azure region name.",
+            "type": "string"
+          }
+        },
+        "required": [
+          "subscriptionId",
+          "region"
+        ]
+      }
+    },
+    {
+      "name": "model_similar_models_get",
+      "description": "Returns a list of similar models. Requires either the model deployment name, or both the model name and version.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "foundryAccountResourceId": {
+            "type": "string"
+          },
+          "modelDeploymentName": {
+            "description": "Optional model deployment name. Required if a model name and version are not provided.",
+            "type": "string",
+            "default": null
+          },
+          "modelName": {
+            "description": "Optional model name. Required if a deployment name is not provided.",
+            "type": "string",
+            "default": null
+          },
+          "modelVersion": {
+            "description": "Optional model version. Required if model name is provided without a deployment name.",
+            "type": "string",
+            "default": null
+          }
+        },
+        "required": [
+          "foundryAccountResourceId"
+        ]
+      }
+    },
+    {
+      "name": "model_switch_recommendations_get",
+      "description": "Recommends similar models to the supplied project model deployment or specified name and version, based on benchmark data. Models that are deprecated or will be deprecated within 30 days are automatically excluded from recommendations. Models approaching deprecation within 90 days will include a deprecationWarning field. Each result row includes deprecationDate and daysUntilDeprecation when available. Each result contains a series of rows, with varying metrics. QualityIndex: Accuracy score - higher is better, CostIndex: Cost per 1 million tokens - lower is better. ThroughputIndex: Throughput in generated tokens per second - higher is better, SafetyIndex: Safety metric - lower is safer, LatencyIndex: Median (P50) latency time in seconds - lower is better",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "foundryAccountResourceId": {
+            "type": "string"
+          },
+          "modelDeploymentName": {
+            "description": "Optional model deployment name. Required if a model name and version are not provided.",
+            "type": "string",
+            "default": null
+          },
+          "modelName": {
+            "description": "Optional model name. Required if a deployment name is not provided.",
+            "type": "string",
+            "default": null
+          },
+          "modelVersion": {
+            "description": "Optional model version. Required if model name is provided without a deployment name.",
+            "type": "string",
+            "default": null
+          },
+          "sortBy": {
+            "description": "Optional sort by parameter. Possible values: QualityIndex, CostIndex, ThroughputIndex, SafetyIndex, LatencyIndex, DeprecationDate.",
+            "type": [
+              "string",
+              "null"
+            ],
+            "enum": [
+              "QualityIndex",
+              "CostIndex",
+              "ThroughputIndex",
+              "SafetyIndex",
+              "LatencyIndex",
+              "DeprecationDate",
+              "ReleaseDate",
+              null
+            ],
+            "default": null
+          },
+          "top": {
+            "description": "Optional number of top results to return. Not expected when sortBy is null.",
+            "type": [
+              "integer",
+              "null"
+            ],
+            "default": null
+          }
+        },
+        "required": [
+          "foundryAccountResourceId"
+        ]
+      }
+    },
+    {
+      "name": "project_connection_create",
+      "description": "Create or replace a project connection in an Azure AI Foundry project.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "foundryProjectResourceId": {
+            "description": "Resource ID of the Foundry project. Format: '/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.CognitiveServices/accounts/{accountName}/projects/{projectName}'.",
+            "type": "string"
+          },
+          "connectionName": {
+            "description": "Connection name.",
+            "type": "string"
+          },
+          "authType": {
+            "description": "Authentication type. Supported values: ApiKey, AAD, ManagedIdentity, None, CustomKeys.",
+            "type": "string"
+          },
+          "category": {
+            "description": "Connection category (e.g., AzureOpenAI, CognitiveSearch, ContainerRegistry, AzureBlob, CustomKeys).",
+            "type": "string"
+          },
+          "target": {
+            "description": "Target URL or endpoint for the connection.",
+            "type": "string"
+          },
+          "apiKey": {
+            "description": "API key credential. Required when authType is ApiKey.",
+            "type": "string",
+            "default": null
+          },
+          "expiryTime": {
+            "description": "Connection expiry time in ISO 8601 format (e.g., '2025-12-31T23:59:59Z'). Optional.",
+            "type": "string",
+            "default": null
+          },
+          "metadata": {
+            "description": "Optional metadata key-value pairs for the connection.",
+            "type": "object",
+            "additionalProperties": {
+              "type": "string"
+            },
+            "default": null
+          },
+          "customKeys": {
+            "description": "Custom key-value credentials. Required when authType is CustomKeys.",
+            "type": "object",
+            "additionalProperties": {
+              "type": "string"
+            },
+            "default": null
+          }
+        },
+        "required": [
+          "foundryProjectResourceId",
+          "connectionName",
+          "authType",
+          "category",
+          "target"
+        ]
+      }
+    },
+    {
+      "name": "project_connection_delete",
+      "description": "Delete a project connection by name from an Azure AI Foundry project.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "foundryProjectResourceId": {
+            "description": "Resource ID of the Foundry project. Format: '/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.CognitiveServices/accounts/{accountName}/projects/{projectName}'.",
+            "type": "string"
+          },
+          "connectionName": {
+            "description": "Connection name to delete.",
+            "type": "string"
+          }
+        },
+        "required": [
+          "foundryProjectResourceId",
+          "connectionName"
+        ]
+      }
+    },
+    {
+      "name": "project_connection_get",
+      "description": "Get a project connection by name from an Azure AI Foundry project.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "foundryProjectResourceId": {
+            "description": "Resource ID of the Foundry project. Format: '/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.CognitiveServices/accounts/{accountName}/projects/{projectName}'.",
+            "type": "string"
+          },
+          "connectionName": {
+            "description": "Connection name to retrieve.",
+            "type": "string"
+          }
+        },
+        "required": [
+          "foundryProjectResourceId",
+          "connectionName"
+        ]
+      }
+    },
+    {
+      "name": "project_connection_list",
+      "description": "List all project connections in an Azure AI Foundry project, with optional filtering.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "foundryProjectResourceId": {
+            "description": "Resource ID of the Foundry project. Format: '/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.CognitiveServices/accounts/{accountName}/projects/{projectName}'.",
+            "type": "string"
+          },
+          "category": {
+            "description": "Optional filter by connection category (e.g., AzureOpenAI, CognitiveSearch).",
+            "type": "string",
+            "default": null
+          },
+          "target": {
+            "description": "Optional filter by target URL.",
+            "type": "string",
+            "default": null
+          },
+          "includeAll": {
+            "description": "If true, include both connections and datastores.",
+            "type": [
+              "boolean",
+              "null"
+            ],
+            "default": null
+          }
+        },
+        "required": [
+          "foundryProjectResourceId"
+        ]
+      }
+    },
+    {
+      "name": "project_connection_list_metadata",
+      "description": "List all supported connection categories and authentication types for project connections. Call this tool first to discover valid values before creating or updating a connection.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {}
+      }
+    },
+    {
+      "name": "project_connection_update",
+      "description": "Update (patch) an existing project connection in an Azure AI Foundry project.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "foundryProjectResourceId": {
+            "description": "Resource ID of the Foundry project. Format: '/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.CognitiveServices/accounts/{accountName}/projects/{projectName}'.",
+            "type": "string"
+          },
+          "connectionName": {
+            "description": "Connection name to update.",
+            "type": "string"
+          },
+          "authType": {
+            "description": "Authentication type. Supported values: ApiKey, AAD, ManagedIdentity, None, CustomKeys.",
+            "type": "string"
+          },
+          "category": {
+            "description": "Connection category (e.g., AzureOpenAI, CognitiveSearch, ContainerRegistry, AzureBlob, CustomKeys).",
+            "type": "string"
+          },
+          "target": {
+            "description": "Target URL or endpoint for the connection.",
+            "type": "string"
+          },
+          "apiKey": {
+            "description": "API key credential. Required when authType is ApiKey.",
+            "type": "string",
+            "default": null
+          },
+          "expiryTime": {
+            "description": "Connection expiry time in ISO 8601 format (e.g., '2025-12-31T23:59:59Z'). Optional.",
+            "type": "string",
+            "default": null
+          },
+          "metadata": {
+            "description": "Optional metadata key-value pairs for the connection.",
+            "type": "object",
+            "additionalProperties": {
+              "type": "string"
+            },
+            "default": null
+          },
+          "customKeys": {
+            "description": "Custom key-value credentials. Required when authType is CustomKeys.",
+            "type": "object",
+            "additionalProperties": {
+              "type": "string"
+            },
+            "default": null
+          }
+        },
+        "required": [
+          "foundryProjectResourceId",
+          "connectionName",
+          "authType",
+          "category",
+          "target"
+        ]
+      }
+    },
+    {
+      "name": "prompt_optimize",
+      "description": "Optimize a developer prompt (system message / instructions) for better LLM performance using the Azure OpenAI Prompt Optimizer. Provide the prompt text and a model deployment name. Either a project endpoint or a Foundry account resource ID is required to locate the Azure OpenAI endpoint.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "developerMessage": {
+            "description": "The developer message or system prompt text to optimize.",
+            "type": "string"
+          },
+          "deploymentName": {
+            "description": "The model deployment name to use for optimization (e.g., 'gpt-4o').",
+            "type": "string"
+          },
+          "projectEndpoint": {
+            "description": "Azure AI Project endpoint. Format: 'https://{account}.services.ai.azure.com/api/projects/{project}'. Provide this or foundryAccountResourceId.",
+            "type": "string",
+            "format": "uri",
+            "default": null
+          },
+          "foundryAccountResourceId": {
+            "description": "ARM resource ID of the Foundry account. Format: '/subscriptions/{sub}/resourceGroups/{rg}/providers/Microsoft.CognitiveServices/accounts/{account}'. Provide this or projectEndpoint.",
+            "type": "string",
+            "default": null
+          },
+          "requestedChanges": {
+            "description": "Optional suggestions for how to change or improve the prompt. Use when refining an already-optimized prompt.",
+            "type": "string",
+            "default": null
+          }
+        },
+        "required": [
+          "developerMessage",
+          "deploymentName"
+        ]
+      }
+    },
+    {
+      "name": "session_create",
+      "description": "Creates a new session for a hosted agent. Sessions provide isolated compute environments for agent execution. Returns the created session resource with session ID, status, and expiration.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "projectEndpoint": {
+            "description": "Microsoft Foundry Project endpoint. Format: 'https://{account}.services.ai.azure.com/api/projects/{project}'.",
+            "type": "string",
+            "format": "uri"
+          },
+          "agentName": {
+            "description": "Name of the hosted agent to create a session for.",
+            "type": "string"
+          },
+          "sessionId": {
+            "description": "Optional session ID. If omitted, one will be auto-generated. Must match pattern ^[A-Za-z0-9_-]{8,128}$ if provided.",
+            "type": "string",
+            "default": null
+          }
+        },
+        "required": [
+          "projectEndpoint",
+          "agentName"
+        ]
+      },
+      "annotations": {
+        "readOnlyHint": false
+      }
+    },
+    {
+      "name": "session_delete",
+      "description": "Deletes a session for a hosted agent, releasing its compute resources.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "projectEndpoint": {
+            "description": "Microsoft Foundry Project endpoint. Format: 'https://{account}.services.ai.azure.com/api/projects/{project}'.",
+            "type": "string",
+            "format": "uri"
+          },
+          "agentName": {
+            "description": "Name of the hosted agent.",
+            "type": "string"
+          },
+          "sessionId": {
+            "description": "The session ID to delete.",
+            "type": "string"
+          }
+        },
+        "required": [
+          "projectEndpoint",
+          "agentName",
+          "sessionId"
+        ]
+      },
+      "annotations": {
+        "readOnlyHint": false
+      }
+    },
+    {
+      "name": "session_file_delete",
+      "description": "Deletes a file or directory from a hosted agent session.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "projectEndpoint": {
+            "description": "Microsoft Foundry Project endpoint. Format: 'https://{account}.services.ai.azure.com/api/projects/{project}'.",
+            "type": "string",
+            "format": "uri"
+          },
+          "agentName": {
+            "description": "Name of the hosted agent.",
+            "type": "string"
+          },
+          "sessionId": {
+            "description": "The session ID to delete the file from.",
+            "type": "string"
+          },
+          "filePath": {
+            "description": "The file or directory path to delete (e.g., '/data/output.csv').",
+            "type": "string"
+          },
+          "recursive": {
+            "description": "If true, recursively delete a directory and its contents. Defaults to false.",
+            "type": "boolean",
+            "default": false
+          }
+        },
+        "required": [
+          "projectEndpoint",
+          "agentName",
+          "sessionId",
+          "filePath"
+        ]
+      },
+      "annotations": {
+        "readOnlyHint": false
+      }
+    },
+    {
+      "name": "session_file_download",
+      "description": "Downloads a file from a hosted agent session. Returns the file content as a base64-encoded string.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "projectEndpoint": {
+            "description": "Microsoft Foundry Project endpoint. Format: 'https://{account}.services.ai.azure.com/api/projects/{project}'.",
+            "type": "string",
+            "format": "uri"
+          },
+          "agentName": {
+            "description": "Name of the hosted agent.",
+            "type": "string"
+          },
+          "sessionId": {
+            "description": "The session ID to download the file from.",
+            "type": "string"
+          },
+          "filePath": {
+            "description": "The file path in the session to download (e.g., '/data/output.csv').",
+            "type": "string"
+          }
+        },
+        "required": [
+          "projectEndpoint",
+          "agentName",
+          "sessionId",
+          "filePath"
+        ]
+      },
+      "annotations": {
+        "readOnlyHint": true
+      }
+    },
+    {
+      "name": "session_file_list",
+      "description": "Lists files and directories in a hosted agent session at the specified path.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "projectEndpoint": {
+            "description": "Microsoft Foundry Project endpoint. Format: 'https://{account}.services.ai.azure.com/api/projects/{project}'.",
+            "type": "string",
+            "format": "uri"
+          },
+          "agentName": {
+            "description": "Name of the hosted agent.",
+            "type": "string"
+          },
+          "sessionId": {
+            "description": "The session ID to list files from.",
+            "type": "string"
+          },
+          "path": {
+            "description": "Optional directory path to list. Defaults to root '/'.",
+            "type": "string",
+            "default": null
+          }
+        },
+        "required": [
+          "projectEndpoint",
+          "agentName",
+          "sessionId"
+        ]
+      },
+      "annotations": {
+        "readOnlyHint": true
+      }
+    },
+    {
+      "name": "session_file_mkdir",
+      "description": "Creates a directory in a hosted agent session's filesystem. Can create parent directories automatically.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "projectEndpoint": {
+            "description": "Microsoft Foundry Project endpoint. Format: 'https://{account}.services.ai.azure.com/api/projects/{project}'.",
+            "type": "string",
+            "format": "uri"
+          },
+          "agentName": {
+            "description": "Name of the hosted agent.",
+            "type": "string"
+          },
+          "sessionId": {
+            "description": "The session ID to create the directory in.",
+            "type": "string"
+          },
+          "path": {
+            "description": "The directory path to create (e.g., '/data/results').",
+            "type": "string"
+          },
+          "createParents": {
+            "description": "If true, create parent directories as needed (like mkdir -p). Defaults to true.",
+            "type": "boolean",
+            "default": true
+          },
+          "mode": {
+            "description": "Optional Unix permission mode for the directory (e.g., 755). If not specified, uses system default.",
+            "type": [
+              "integer",
+              "null"
+            ],
+            "default": null
+          }
+        },
+        "required": [
+          "projectEndpoint",
+          "agentName",
+          "sessionId",
+          "path"
+        ]
+      },
+      "annotations": {
+        "readOnlyHint": false
+      }
+    },
+    {
+      "name": "session_file_stat",
+      "description": "Gets metadata for a file or directory in a hosted agent session, including name, size, whether it is a directory, and last modified time.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "projectEndpoint": {
+            "description": "Microsoft Foundry Project endpoint. Format: 'https://{account}.services.ai.azure.com/api/projects/{project}'.",
+            "type": "string",
+            "format": "uri"
+          },
+          "agentName": {
+            "description": "Name of the hosted agent.",
+            "type": "string"
+          },
+          "sessionId": {
+            "description": "The session ID containing the file.",
+            "type": "string"
+          },
+          "filePath": {
+            "description": "The file or directory path to inspect (e.g., '/data/output.csv').",
+            "type": "string"
+          }
+        },
+        "required": [
+          "projectEndpoint",
+          "agentName",
+          "sessionId",
+          "filePath"
+        ]
+      },
+      "annotations": {
+        "readOnlyHint": true
+      }
+    },
+    {
+      "name": "session_file_upload",
+      "description": "Uploads a file to a hosted agent session. The file is stored at the specified path in the session's filesystem.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "projectEndpoint": {
+            "description": "Microsoft Foundry Project endpoint. Format: 'https://{account}.services.ai.azure.com/api/projects/{project}'.",
+            "type": "string",
+            "format": "uri"
+          },
+          "agentName": {
+            "description": "Name of the hosted agent.",
+            "type": "string"
+          },
+          "sessionId": {
+            "description": "The session ID to upload the file to.",
+            "type": "string"
+          },
+          "filePath": {
+            "description": "The destination file path in the session (e.g., '/data/input.csv').",
+            "type": "string"
+          },
+          "contentBase64": {
+            "description": "The file content as a base64-encoded string.",
+            "type": "string"
+          }
+        },
+        "required": [
+          "projectEndpoint",
+          "agentName",
+          "sessionId",
+          "filePath",
+          "contentBase64"
+        ]
+      },
+      "annotations": {
+        "readOnlyHint": false
+      }
+    },
+    {
+      "name": "session_get",
+      "description": "Gets details of a specific session for a hosted agent, including status, version, creation time, and expiration.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "projectEndpoint": {
+            "description": "Microsoft Foundry Project endpoint. Format: 'https://{account}.services.ai.azure.com/api/projects/{project}'.",
+            "type": "string",
+            "format": "uri"
+          },
+          "agentName": {
+            "description": "Name of the hosted agent.",
+            "type": "string"
+          },
+          "sessionId": {
+            "description": "The session ID to retrieve.",
+            "type": "string"
+          }
+        },
+        "required": [
+          "projectEndpoint",
+          "agentName",
+          "sessionId"
+        ]
+      },
+      "annotations": {
+        "readOnlyHint": true
+      }
+    },
+    {
+      "name": "session_list",
+      "description": "Lists sessions for a hosted agent with pagination support.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "projectEndpoint": {
+            "description": "Microsoft Foundry Project endpoint. Format: 'https://{account}.services.ai.azure.com/api/projects/{project}'.",
+            "type": "string",
+            "format": "uri"
+          },
+          "agentName": {
+            "description": "Name of the hosted agent.",
+            "type": "string"
+          },
+          "limit": {
+            "description": "Maximum number of sessions to return. Defaults to 20, max 100.",
+            "type": [
+              "integer",
+              "null"
+            ],
+            "default": null
+          },
+          "order": {
+            "description": "Sort order: 'asc' or 'desc'. Defaults to 'desc'.",
+            "type": "string",
+            "default": null
+          },
+          "after": {
+            "description": "Cursor for forward pagination — return sessions after this ID.",
+            "type": "string",
+            "default": null
+          },
+          "before": {
+            "description": "Cursor for backward pagination — return sessions before this ID.",
+            "type": "string",
+            "default": null
+          }
+        },
+        "required": [
+          "projectEndpoint",
+          "agentName"
+        ]
+      },
+      "annotations": {
+        "readOnlyHint": true
+      }
+    },
+    {
+      "name": "session_logstream",
+      "description": "Streams console logs (stdout/stderr) from a hosted agent session. Returns structured log output with parsed SSE events. Useful for debugging and monitoring running sessions. Output is capped at maxLines to prevent unbounded reads.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "projectEndpoint": {
+            "description": "Microsoft Foundry Project endpoint. Format: 'https://{account}.services.ai.azure.com/api/projects/{project}'.",
+            "type": "string",
+            "format": "uri"
+          },
+          "agentName": {
+            "description": "Name of the hosted agent.",
+            "type": "string"
+          },
+          "sessionId": {
+            "description": "The session ID to stream logs from.",
+            "type": "string"
+          },
+          "maxLines": {
+            "description": "Maximum number of log lines to return. Defaults to 500. Use a smaller value for quick checks.",
+            "type": [
+              "integer",
+              "null"
+            ],
+            "default": null
+          }
+        },
+        "required": [
+          "projectEndpoint",
+          "agentName",
+          "sessionId"
+        ]
+      },
+      "annotations": {
+        "readOnlyHint": true
+      }
+    },
+    {
+      "name": "toolbox_delete",
+      "description": "Delete a toolbox along with all of its versions. This operation is irreversible.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "projectEndpoint": {
+            "description": "Microsoft Foundry Project endpoint, for example 'https://{account}.{region-specific-ai-services-endpoint}/api/projects/{project}'.",
+            "type": "string",
+            "format": "uri"
+          },
+          "toolboxName": {
+            "description": "Name of the toolbox to delete.",
+            "type": "string"
+          }
+        },
+        "required": [
+          "projectEndpoint",
+          "toolboxName"
+        ]
+      },
+      "annotations": {
+        "readOnlyHint": false
+      }
+    },
+    {
+      "name": "toolbox_get",
+      "description": "List all toolboxes in a Microsoft Foundry Project, or get a specific toolbox (including its default version pointer) if a toolbox name is provided.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "projectEndpoint": {
+            "description": "Microsoft Foundry Project endpoint, for example 'https://{account}.{region-specific-ai-services-endpoint}/api/projects/{project}'.",
+            "type": "string",
+            "format": "uri"
+          },
+          "toolboxName": {
+            "description": "Optional name of a toolbox to retrieve. If null or empty, lists all toolboxes on the project.",
+            "type": "string",
+            "default": null
+          }
+        },
+        "required": [
+          "projectEndpoint"
+        ]
+      },
+      "annotations": {
+        "readOnlyHint": true
+      }
+    },
+    {
+      "name": "toolbox_update",
+      "description": "Update a toolbox to point its default version at a specific existing version. Use this to roll a toolbox forward or back to a previously created version.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "projectEndpoint": {
+            "description": "Microsoft Foundry Project endpoint, for example 'https://{account}.{region-specific-ai-services-endpoint}/api/projects/{project}'.",
+            "type": "string",
+            "format": "uri"
+          },
+          "toolboxName": {
+            "description": "Name of the toolbox to update.",
+            "type": "string"
+          },
+          "defaultVersion": {
+            "description": "The version identifier that the toolbox's default version should resolve to.",
+            "type": "string"
+          }
+        },
+        "required": [
+          "projectEndpoint",
+          "toolboxName",
+          "defaultVersion"
+        ]
+      },
+      "annotations": {
+        "readOnlyHint": false
+      }
+    },
+    {
+      "name": "toolbox_version_create",
+      "description": "Create a new immutable version of a toolbox, provisioning the toolbox itself if it does not already exist. Every update creates a new version. The toolbox's default version pointer is NOT advanced automatically: a newly created version is only reachable by explicit version identifier until the default is moved. To make this new version the default, call 'toolbox_update' afterwards with the returned version identifier.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "projectEndpoint": {
+            "description": "Microsoft Foundry Project endpoint, for example 'https://{account}.{region-specific-ai-services-endpoint}/api/projects/{project}'.",
+            "type": "string",
+            "format": "uri"
+          },
+          "toolboxName": {
+            "description": "Name of the toolbox. If the toolbox does not exist, it will be created.",
+            "type": "string"
+          },
+          "tools": {
+            "description": "JSON array of tool definitions to include in this version. Each tool object requires a 'type' property. Supported types include: 'code_interpreter', 'file_search', 'web_search', 'mcp', 'azure_ai_search', 'openapi', 'a2a_preview', 'browser_automation_preview'. IMPORTANT: when the array contains more than one tool, every tool except at most one must carry a unique identifier - a 'name' property, or 'server_label' for 'mcp' tools. Omitting these on multiple tools is rejected with an 'invalid_payload' error. For example, use [{\"type\":\"code_interpreter\",\"name\":\"ci\"},{\"type\":\"file_search\",\"name\":\"fs\"}] rather than [{\"type\":\"code_interpreter\"},{\"type\":\"file_search\"}]."
+          },
+          "description": {
+            "description": "Optional human-readable description of the toolbox (max 512 characters).",
+            "type": "string",
+            "default": null
+          },
+          "skills": {
+            "description": "Optional JSON array of skill sources to include. A skill reference has type 'skill_reference' with a 'name' and optional 'version'.",
+            "default": null
+          },
+          "policies": {
+            "description": "Optional JSON object with policy configuration for the toolbox version, such as responsible AI content filtering ('rai_config').",
+            "default": null
+          },
+          "metadata": {
+            "description": "Optional arbitrary key-value metadata to associate with the toolbox.",
+            "type": "object",
+            "additionalProperties": {
+              "type": "string"
+            },
+            "default": null
+          }
+        },
+        "required": [
+          "projectEndpoint",
+          "toolboxName",
+          "tools"
+        ]
+      },
+      "annotations": {
+        "readOnlyHint": false
+      }
+    },
+    {
+      "name": "toolbox_version_delete",
+      "description": "Delete a specific version of a toolbox. This operation is irreversible. A version that is currently the toolbox's default version cannot be deleted: first call 'toolbox_update' to point the default at a different version, or delete the whole toolbox instead.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "projectEndpoint": {
+            "description": "Microsoft Foundry Project endpoint, for example 'https://{account}.{region-specific-ai-services-endpoint}/api/projects/{project}'.",
+            "type": "string",
+            "format": "uri"
+          },
+          "toolboxName": {
+            "description": "Name of the toolbox.",
+            "type": "string"
+          },
+          "version": {
+            "description": "The version identifier to delete.",
+            "type": "string"
+          }
+        },
+        "required": [
+          "projectEndpoint",
+          "toolboxName",
+          "version"
+        ]
+      },
+      "annotations": {
+        "readOnlyHint": false
+      }
+    },
+    {
+      "name": "toolbox_version_get",
+      "description": "List all versions of a toolbox, or get a specific immutable version (including its tools, skills, and policies) if a version identifier is provided.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "projectEndpoint": {
+            "description": "Microsoft Foundry Project endpoint, for example 'https://{account}.{region-specific-ai-services-endpoint}/api/projects/{project}'.",
+            "type": "string",
+            "format": "uri"
+          },
+          "toolboxName": {
+            "description": "Name of the toolbox.",
+            "type": "string"
+          },
+          "version": {
+            "description": "Optional version identifier to retrieve. If null or empty, lists all versions of the toolbox.",
+            "type": "string",
+            "default": null
+          }
+        },
+        "required": [
+          "projectEndpoint",
+          "toolboxName"
+        ]
+      },
+      "annotations": {
+        "readOnlyHint": true
+      }
+    }
+  ]
+}

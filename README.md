@@ -18,15 +18,28 @@ official remote Microsoft Foundry MCP connector at `https://mcp.ai.azure.com`.
 - `scripts/build-skill.mjs` - generates the package projection by renaming
   nested skill entry points, flattening paths deeper than three directories,
   rewriting Markdown links, and wrapping unsupported PowerShell and Bicep files
-  as Markdown references.
+  as Markdown references. It also adapts local-only prerequisites so Cowork
+  invokes the bundled Foundry MCP connector directly.
+- `appPackage/tools/foundry-mcp-tools.json` - the connector's static tool
+  description, referenced by `mcpToolDescription`. Cowork requires this file;
+  it does not fall back to runtime `tools/list` discovery.
+- `scripts/fetch-mcp-tools.mjs` - regenerates that file from the live MCP
+  server (`az login` first).
+- `scripts/inject-tool-description.sh` - adds the tool description to the built
+  `.zip`. The Agents Toolkit packager does not copy `mcpToolDescription.file`,
+  so this runs as a lifecycle `script` step after packaging.
+- `docs/cowork-mcp-connector-findings.md` - the sharp edges found while wiring
+  an authenticated MCP connector into Cowork, plus proposed wiqd improvements.
 
 The initial import is pinned in [NOTICE.md](NOTICE.md). Upstream content remains
 licensed under the MIT License included in [LICENSE](LICENSE).
 
-The remote connector uses Microsoft Entra SSO with the first-party Foundry MCP
-resource application and requests user authorization at runtime. Provisioning
-creates the Enterprise token-store configuration referenced by the manifest;
-no client secret is stored in this repository.
+The remote connector uses Microsoft Entra authorization code flow with PKCE.
+Its single-tenant public client requests the delegated
+`https://mcp.ai.azure.com/Foundry.Mcp.Tools` scope and uses the Microsoft Teams
+OAuth redirect URI. Provisioning creates the Enterprise token-store
+configuration referenced by the manifest; no client secret or callback server
+is required.
 
 ## Update from upstream
 

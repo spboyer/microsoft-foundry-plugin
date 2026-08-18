@@ -197,6 +197,71 @@ function splitRootSkill(content) {
   };
 }
 
+function adaptRootSkillForCowork(content) {
+  const dependencyStart = "### Dependency Check and Setup";
+  const dependencyEnd = "### Workflow Guidance";
+  const dependencyStartIndex = content.indexOf(dependencyStart);
+  const dependencyEndIndex = content.indexOf(dependencyEnd);
+
+  if (
+    dependencyStartIndex === -1 ||
+    dependencyEndIndex === -1 ||
+    dependencyEndIndex <= dependencyStartIndex
+  ) {
+    throw new Error("Unable to locate the root skill dependency section");
+  }
+
+  const dependencyReplacement = [
+    dependencyStart,
+    "",
+    "The upstream dependency script applies only to workflows that execute local",
+    "`azd`, Azure CLI, Python, or shell commands. In Microsoft 365 Cowork, do not",
+    "search for or run dependency scripts before connector-only operations such as",
+    "listing Foundry agents.",
+    "",
+    "For a local command workflow, run the appropriate script before continuing:",
+    "",
+    "```bash",
+    "./scripts/check-and-setup-dependencies.sh     # macOS / Linux",
+    "./scripts/check-and-setup-dependencies.ps1    # Windows (pwsh)",
+    "```",
+    "",
+    "",
+  ].join("\n");
+
+  content = `${content.slice(0, dependencyStartIndex)}${dependencyReplacement}${content.slice(dependencyEndIndex)}`;
+
+  const foundryMcpStart = "### Foundry MCP";
+  const foundryMcpEnd = "### azd";
+  const foundryMcpStartIndex = content.indexOf(foundryMcpStart);
+  const foundryMcpEndIndex = content.indexOf(foundryMcpEnd);
+
+  if (
+    foundryMcpStartIndex === -1 ||
+    foundryMcpEndIndex === -1 ||
+    foundryMcpEndIndex <= foundryMcpStartIndex
+  ) {
+    throw new Error("Unable to locate the root skill Foundry MCP section");
+  }
+
+  const foundryMcpReplacement = [
+    foundryMcpStart,
+    "",
+    "In Microsoft 365 Cowork, use the bundled **Microsoft Foundry MCP** agent",
+    "connector as the Foundry tool source. Its tools are discovered dynamically at",
+    "runtime. Invoke those connector tools directly; do not search for or require a",
+    "separate Azure MCP `foundry` discovery tool.",
+    "",
+    "If the connector requires sign-in or consent, ask the user to complete that",
+    "prompt. If no connector tools are available, report that the bundled connector",
+    "was not loaded instead of searching the skill package for local scripts.",
+    "",
+    "",
+  ].join("\n");
+
+  return `${content.slice(0, foundryMcpStartIndex)}${foundryMcpReplacement}${content.slice(foundryMcpEndIndex)}`;
+}
+
 const sourceFiles = await walk(sourceRoot);
 const outputMap = new Map();
 const outputPaths = new Set();
@@ -230,7 +295,7 @@ for (const [sourcePath, outputPath] of outputMap) {
   }
   if (sourcePath === "SKILL.md") {
     const splitSkill = splitRootSkill(content);
-    content = splitSkill.rootContent;
+    content = adaptRootSkillForCowork(splitSkill.rootContent);
     commonContextReference = splitSkill.referenceContent;
   }
   content = rewriteMovedPaths(content, sourcePath, outputPath, outputMap);

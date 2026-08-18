@@ -19,9 +19,15 @@ provision:
       name: microsoft-foundry-mcp
       appId: ${{TEAMS_APP_ID}}
       flow: authorizationCode
-      identityProvider: MicrosoftEntra
+      identityProvider: Custom
       baseUrl: https://mcp.ai.azure.com
       clientId: ${{FOUNDRY_MCP_CLIENT_ID}}
+      authorizationUrl: https://login.microsoftonline.com/72f988bf-86f1-41af-91ab-2d7cd011db47/oauth2/v2.0/authorize
+      tokenUrl: https://login.microsoftonline.com/72f988bf-86f1-41af-91ab-2d7cd011db47/oauth2/v2.0/token
+      refreshUrl: https://login.microsoftonline.com/72f988bf-86f1-41af-91ab-2d7cd011db47/oauth2/v2.0/token
+      scope: https://mcp.ai.azure.com/Foundry.Mcp.Tools,offline_access
+      isPKCEEnabled: true
+      tokenExchangeMethodType: PostRequestBody
       applicableToApps: SpecificApp
       targetAudience: HomeTenant
     writeToEnvironmentFile:
@@ -34,6 +40,12 @@ provision:
       manifestPath: ./appPackage/manifest.json
       outputZipPath: ./appPackage/build/appPackage.${{TEAMSFX_ENV}}.zip
       outputFolder: ./appPackage/build
+
+  # ATK's packager does not copy mcpToolDescription.file; inject it manually.
+  - uses: script
+    with:
+      run: bash ./scripts/inject-tool-description.sh
+      workingDirectory: .
 
   # Validate app package using validation rules
   - uses: teamsApp/validateAppPackage

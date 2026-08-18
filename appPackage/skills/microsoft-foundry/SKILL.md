@@ -17,16 +17,17 @@ Follow each applicable subsection below before starting its corresponding action
 
 ### Dependency Check and Setup
 
-**MANDATORY:** As the first step after this skill loads, run the dependency check and setup script below from this skill's root and wait for it to finish before continuing. The script checks first and installs only missing dependencies; it does not reinstall dependencies that are already available.
+The upstream dependency script applies only to workflows that execute local
+`azd`, Azure CLI, Python, or shell commands. In Microsoft 365 Cowork, do not
+search for or run dependency scripts before connector-only operations such as
+listing Foundry agents.
 
-**You MUST complete this check before reading or entering any sub-skill, workflow, or workflow-specific reference.**
+For a local command workflow, run the appropriate script before continuing:
 
 ```bash
 ./scripts/check-and-setup-dependencies.sh     # macOS / Linux
 ./scripts/check-and-setup-dependencies.ps1    # Windows (pwsh)
 ```
-
-Strictly follow the script output for subsequent actions.
 
 ### Workflow Guidance
 
@@ -34,7 +35,14 @@ Strictly follow the script output for subsequent actions.
 
 ### Foundry MCP
 
-**MANDATORY:** Before using Foundry MCP operations, call the Azure MCP `foundry` tool and inspect the available Foundry MCP tools and related parameters. Treat this as the discovery/help step for MCP-based workflows.
+In Microsoft 365 Cowork, use the bundled **Microsoft Foundry MCP** agent
+connector as the Foundry tool source. Its tools are discovered dynamically at
+runtime. Invoke those connector tools directly; do not search for or require a
+separate Azure MCP `foundry` discovery tool.
+
+If the connector requires sign-in or consent, ask the user to complete that
+prompt. If no connector tools are available, report that the bundled connector
+was not loaded instead of searching the skill package for local scripts.
 
 ### azd
 
