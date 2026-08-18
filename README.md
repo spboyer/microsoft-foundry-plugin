@@ -23,6 +23,11 @@ official remote Microsoft Foundry MCP connector at `https://mcp.ai.azure.com`.
 The initial import is pinned in [NOTICE.md](NOTICE.md). Upstream content remains
 licensed under the MIT License included in [LICENSE](LICENSE).
 
+The remote connector uses Microsoft Entra SSO with the first-party Foundry MCP
+resource application and requests user authorization at runtime. Provisioning
+creates the Enterprise token-store configuration referenced by the manifest;
+no client secret is stored in this repository.
+
 ## Update from upstream
 
 ```bash

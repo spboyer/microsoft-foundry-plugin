@@ -1,7 +1,7 @@
-# yaml-language-server: $schema=https://aka.ms/m365-agents-toolkits/v1.12/yaml.schema.json
+# yaml-language-server: $schema=https://aka.ms/m365-agents-toolkits/v1.13/yaml.schema.json
 # Visit https://aka.ms/teamsfx-v5.0-guide for details on this file
 # Visit https://aka.ms/teamsfx-actions for details on actions
-version: v1.12
+version: v1.13
 
 environmentFolderPath: ./env
 
@@ -16,6 +16,19 @@ provision:
     # the specified environment variable(s).
     writeToEnvironmentFile:
       teamsAppId: TEAMS_APP_ID
+
+  - uses: oauth/register
+    with:
+      name: microsoft-foundry-mcp
+      appId: ${{TEAMS_APP_ID}}
+      flow: authorizationCode
+      identityProvider: MicrosoftEntra
+      baseUrl: https://mcp.ai.azure.com
+      clientId: ${{FOUNDRY_MCP_CLIENT_ID}}
+      applicableToApps: SpecificApp
+      targetAudience: HomeTenant
+    writeToEnvironmentFile:
+      configurationId: FOUNDRY_MCP_AUTH_ID
 
   # Build app package with latest env value
   - uses: teamsApp/zipAppPackage

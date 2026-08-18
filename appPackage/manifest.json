@@ -1,7 +1,7 @@
 {
   "$schema": "https://developer.microsoft.com/en-us/json-schemas/teams/v1.29/MicrosoftTeams.schema.json",
   "manifestVersion": "1.29",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "id": "${{TEAMS_APP_ID}}",
   "developer": {
     "name": "Microsoft Foundry",
@@ -38,7 +38,11 @@
       "description": "Remote Microsoft Foundry tools for models, deployments, agents, evaluations, and project operations.",
       "toolSource": {
         "remoteMcpServer": {
-          "mcpServerUrl": "https://mcp.ai.azure.com"
+          "mcpServerUrl": "https://mcp.ai.azure.com",
+          "authorization": {
+            "type": "OAuthPluginVault",
+            "referenceId": "${{FOUNDRY_MCP_AUTH_ID}}"
+          }
         }
       }
     }
