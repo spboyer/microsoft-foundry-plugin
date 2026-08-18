@@ -319,8 +319,8 @@ After persisting, update `.foundry/datasets/manifest.json` with lineage informat
 After creating a dataset:
 - **Sync to Foundry** → Step 5 below (recommended for shared/CI use)
 - **Run evaluation** → [observe skill Step 2](../../observe/references/evaluate-step.md)
-- **Version and tag** → [Dataset Versioning](dataset-versioning.md)
-- **Organize into splits** → [Dataset Organization](dataset-organization.md)
+- **Version and tag** → [Dataset Versioning](./dataset-versioning.md)
+- **Organize into splits** → [Dataset Organization](./dataset-organization.md)
 
 ## Step 5 — Sync Local Cache with Foundry (Optional)
 

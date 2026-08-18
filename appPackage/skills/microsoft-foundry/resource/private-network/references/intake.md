@@ -67,7 +67,7 @@ User has existing IaC they want to extend?
     └── Partial or no fit → ADAPT (start from closest template)
 ```
 
-**OFFICIAL:** Load [template-index.md](template-index.md), fetch the best-fit README from GitHub. Present the match using the template's descriptive name.
+**OFFICIAL:** Load [template-index.md](./template-index.md), fetch the best-fit README from GitHub. Present the match using the template's descriptive name.
 
 **ADAPT:** Fetch the closest template's README. Explain what doesn't fit, present the delta, offer to adapt.
 

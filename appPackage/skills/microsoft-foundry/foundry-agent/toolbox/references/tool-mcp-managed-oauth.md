@@ -2,11 +2,11 @@
 
 Attach a remote MCP server whose OAuth is **brokered by Foundry** — you do **not** supply `client_id` / `client_secret`. Use when the MCP server appears as a **catalog tile** ("Custom · Preview" / a connector-namespace connector) and you accept Microsoft's managed OAuth app. Foundry owns the app registration, token storage, and refresh; the first `tools/list` triggers a one-time per-user consent.
 
-For the variant where you own the OAuth app (BYO `client_id` / `client_secret`), see [tool-mcp-custom-oauth.md](tool-mcp-custom-oauth.md). For the connector-namespace `gateway_connector` variant, see [foundry-tool-catalog.md → Gateway connector full flow](../../create/references/foundry-tool-catalog.md#gateway-connector-full-flow).
+For the variant where you own the OAuth app (BYO `client_id` / `client_secret`), see [tool-mcp-custom-oauth.md](./tool-mcp-custom-oauth.md). For the connector-namespace `gateway_connector` variant, see [foundry-tool-catalog.md → Gateway connector full flow](../../create/references/foundry-tool-catalog.md#gateway-connector-full-flow).
 
 > 🚦 Before creating a toolbox/connection, read [create-hosted.md → Toolbox creation boundary](../../create/create-hosted.md#toolbox-creation-boundary).
 
-There is **no redirect-URI round-trip** and **no `client_secret`** to manage — the two things the managed flow removes versus [tool-mcp-custom-oauth.md](tool-mcp-custom-oauth.md).
+There is **no redirect-URI round-trip** and **no `client_secret`** to manage — the two things the managed flow removes versus [tool-mcp-custom-oauth.md](./tool-mcp-custom-oauth.md).
 
 ---
 
@@ -72,7 +72,7 @@ azd ai toolbox publish github-tools <new-version> --project-endpoint "$FOUNDRY_P
 
 # B. Declarative `azure.yaml`
 
-Create the managed-OAuth connection first (section A, step 1), then reference it by name via `project_connection_id` and `azd deploy agent-tools` — the same `host: azure.ai.toolbox` shape as every MCP variant. See [tool-mcp-noauth.md § B](tool-mcp-noauth.md#b-declarative-azureyaml) for the full `azure.yaml` skeleton.
+Create the managed-OAuth connection first (section A, step 1), then reference it by name via `project_connection_id` and `azd deploy agent-tools` — the same `host: azure.ai.toolbox` shape as every MCP variant. See [tool-mcp-noauth.md § B](./tool-mcp-noauth.md#b-declarative-azureyaml) for the full `azure.yaml` skeleton.
 
 ```yaml
     tools:
@@ -88,9 +88,9 @@ The `-32006` consent gate below still applies — the first `tools/list` trigger
 
 ## Verify
 
-Call `tools/list` against the endpoint — see [test-endpoint.md](test-endpoint.md). The first call for an un-consented user returns the `-32006` consent gate (managed differs only in that Foundry's app already allow-lists its own redirect — no callback registration). See [test-endpoint.md § OAuth consent flow](test-endpoint.md#oauth-consent-flow--32006).
+Call `tools/list` against the endpoint — see [test-endpoint.md](./test-endpoint.md). The first call for an un-consented user returns the `-32006` consent gate (managed differs only in that Foundry's app already allow-lists its own redirect — no callback registration). See [test-endpoint.md § OAuth consent flow](./test-endpoint.md#oauth-consent-flow--32006).
 
-MCP-sourced tools surface as `{server_label}___{tool_name}` (three underscores). See [mcp-protocol.md § Tool naming](mcp-protocol.md#tool-naming).
+MCP-sourced tools surface as `{server_label}___{tool_name}` (three underscores). See [mcp-protocol.md § Tool naming](./mcp-protocol.md#tool-naming).
 
 ### Managed-connector troubleshooting
 
@@ -104,5 +104,5 @@ MCP-sourced tools surface as `{server_label}___{tool_name}` (three underscores).
 
 - [MCP tool documentation](https://learn.microsoft.com/azure/foundry/agents/how-to/tools/mcp)
 - [foundry-tool-catalog.md](../../create/references/foundry-tool-catalog.md) — catalog discovery APIs, ARM PUT bodies, consent internals
-- [tool-mcp-custom-oauth.md](tool-mcp-custom-oauth.md) — BYO OAuth2 app variant
+- [tool-mcp-custom-oauth.md](./tool-mcp-custom-oauth.md) — BYO OAuth2 app variant
 - [toolbox.md § Supported tool types](../toolbox.md#supported-tool-types)

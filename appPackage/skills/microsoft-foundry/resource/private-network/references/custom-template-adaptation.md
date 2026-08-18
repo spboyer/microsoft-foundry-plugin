@@ -6,7 +6,7 @@ For the EXTEND path — when the user has existing Bicep or Terraform templates.
 
 1. **Read** the user's existing template files. Understand the resource graph: what's defined, how resources reference each other, what naming conventions are used.
 
-2. **Analyze** the template against the user's requirements (from [intake.md](intake.md)) and the Foundry private networking documentation validated in the intake step. Identify:
+2. **Analyze** the template against the user's requirements (from [intake.md](./intake.md)) and the Foundry private networking documentation validated in the intake step. Identify:
    - Resources already present and correctly configured
    - Resources present but misconfigured (wrong settings, missing properties)
    - Resources missing entirely

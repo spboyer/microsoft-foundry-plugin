@@ -61,7 +61,7 @@ az network list-usages --location <location> \
 
 ## Bicep Template
 
-Template: [vpn-dns-setup.bicep](vpn-dns-setup.bicep)
+Template: [vpn-dns-setup.bicep](./vpn-dns-setup.bicep.md)
 
 | Parameter | Required | Default | Description |
 |-----------|----------|---------|-------------|
@@ -147,7 +147,7 @@ Each should resolve to a private IP (`192.168.x.x`), not a public IP.
 
 ### 4. VPN Setup Complete
 
-DNS resolves to private IPs — VPN is working. Return to [post-deployment-validation.md](post-deployment-validation.md) **Step 5** to run the end-to-end tests.
+DNS resolves to private IPs — VPN is working. Return to [post-deployment-validation.md](./post-deployment-validation.md) **Step 5** to run the end-to-end tests.
 
 ## Troubleshooting
 

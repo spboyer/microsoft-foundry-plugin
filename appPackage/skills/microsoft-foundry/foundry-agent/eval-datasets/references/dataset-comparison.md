@@ -98,6 +98,6 @@ Compare how the same agent version performs across different datasets:
 
 ## Next Steps
 
-- **Track trends over time** → [Eval Trending](eval-trending.md)
-- **Check for regressions** → [Eval Regression](eval-regression.md)
-- **Audit full lineage** → [Eval Lineage](eval-lineage.md)
+- **Track trends over time** → [Eval Trending](./eval-trending.md)
+- **Check for regressions** → [Eval Regression](./eval-regression.md)
+- **Audit full lineage** → [Eval Lineage](./eval-lineage.md)

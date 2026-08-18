@@ -2,7 +2,7 @@
 
 For toolboxes containing many tools, replace the full tool list passed to the model with two meta-tools — `tool_search` (natural-language discovery, returns matching tools per query) and `call_tool` (invoke any discovered tool by name) — so context cost stays flat regardless of toolbox size.
 
-Tool Search is a **connectionless directive** — it's declared under a `tools:` block (like `web_search`); **no project connection required**. It is **not** a standalone toolbox: pair it with the tools it should index (see [Behavior](#behavior) and the [Multi-tool rule](toolbox-azd.md#multi-tool-rule)).
+Tool Search is a **connectionless directive** — it's declared under a `tools:` block (like `web_search`); **no project connection required**. It is **not** a standalone toolbox: pair it with the tools it should index (see [Behavior](#behavior) and the [Multi-tool rule](./toolbox-azd.md#multi-tool-rule)).
 
 > 🚦 Before creating a toolbox/connection either way, read [create-hosted.md → Toolbox creation boundary](../../create/create-hosted.md#toolbox-creation-boundary).
 
@@ -111,11 +111,11 @@ The agent references the toolbox **by name** (`TOOLBOX_NAME`), so the MCP endpoi
 
 ## Verify & deploy
 
-After creating the toolbox either way, verify its MCP endpoint end-to-end — with Tool Search enabled, `tools/list` returns only `tool_search` + `call_tool` (the indexed tools are hidden until a `tool_search` call surfaces them). See [test-endpoint.md](test-endpoint.md).
+After creating the toolbox either way, verify its MCP endpoint end-to-end — with Tool Search enabled, `tools/list` returns only `tool_search` + `call_tool` (the indexed tools are hidden until a `tool_search` call surfaces them). See [test-endpoint.md](./test-endpoint.md).
 
 ## References
 
 For full fields, pinning recipes, the verify-with-`tool_search` flow, and best practices, see [Tool Search tool documentation](https://learn.microsoft.com/azure/foundry/agents/how-to/tools/tool-search).
 
-- [agent-tools.md](../../create/references/tools/prompt-agent/agent-tools.md) — tool index
+- [agent-tools.md](../../create/references/tools--prompt-agent--agent-tools.md) — tool index
 - [toolbox.md § Enable Tool Search](../toolbox.md#enable-tool-search)

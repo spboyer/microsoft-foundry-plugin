@@ -1,6 +1,6 @@
 # End-to-End Test (VNet Access Required)
 
-Continues from [post-deployment-validation.md](post-deployment-validation.md). Steps 1–3 there must be complete first.
+Continues from [post-deployment-validation.md](./post-deployment-validation.md). Steps 1–3 there must be complete first.
 
 ## 4. VNet Access Setup
 
@@ -9,7 +9,7 @@ Continues from [post-deployment-validation.md](post-deployment-validation.md). S
 Use `AskUserQuestion`: **"Steps 1-3 are done. The remaining tests need VNet access. How do you want to proceed?"**
 Options:
 - `I have a Bastion VM / jump box`
-- `Set up a point-to-site VPN for me` — read [vpn-dns-setup.md](vpn-dns-setup.md)
+- `Set up a point-to-site VPN for me` — read [vpn-dns-setup.md](./vpn-dns-setup.md)
 - `I have VPN / ExpressRoute already`
 - `Skip testing for now`
 
@@ -104,7 +104,7 @@ Ask user to disconnect VPN. Repeat Phase 2 — it should fail with 403. Report w
 
 ### Requirements Cross-Check
 
-After testing, compare each requirement gathered in [intake.md](intake.md) against the deployed state. Flag any mismatches with remediation steps.
+After testing, compare each requirement gathered in [intake.md](./intake.md) against the deployed state. Flag any mismatches with remediation steps.
 
 ### Cleanup (VPN users only)
 

@@ -82,7 +82,7 @@ exceptions
 | order by timestamp desc
 ```
 
-Offer to view the full conversation for any trace via [Conversation Detail](conversation-detail.md).
+Offer to view the full conversation for any trace via [Conversation Detail](./conversation-detail.md).
 
 ## Hosted Agent Variant — Failures
 

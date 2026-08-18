@@ -102,4 +102,4 @@ Fall back to `Standard` SKU if `GlobalStandard` quota is exhausted.
 
 ## 4. VNet Access & End-to-End Test
 
-For the remaining steps (VNet access setup, DNS resolution, agent lifecycle test, isolation proof, cleanup), read [end-to-end-test.md](end-to-end-test.md).
+For the remaining steps (VNet access setup, DNS resolution, agent lifecycle test, isolation proof, cleanup), read [end-to-end-test.md](./end-to-end-test.md).

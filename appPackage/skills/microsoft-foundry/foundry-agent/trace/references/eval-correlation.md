@@ -54,4 +54,4 @@ Show eval scores as a table:
 | fluency | 4.0 | pass | Natural language flow... |
 | relevance | 2.0 | fail | Response doesn't address... |
 
-When showing alongside a span tree (see [Conversation Detail](conversation-detail.md)), attach eval scores to the span whose `gen_ai.response.id` matches.
+When showing alongside a span tree (see [Conversation Detail](./conversation-detail.md)), attach eval scores to the span whose `gen_ai.response.id` matches.

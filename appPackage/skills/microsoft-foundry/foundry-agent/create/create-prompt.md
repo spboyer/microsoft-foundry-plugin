@@ -1,6 +1,6 @@
 # Create Prompt Agent
 
-Create and manage prompt agents in Azure Foundry Agent Service using MCP tools or Python SDK. For hosted agents (container-based), see [create-hosted.md](create-hosted.md).
+Create and manage prompt agents in Azure Foundry Agent Service using MCP tools or Python SDK. For hosted agents (container-based), see [create-hosted.md](./create-hosted.md).
 
 ## Quick Reference
 
@@ -56,8 +56,8 @@ For a **workflow**:
 ### Step 3: SDK Fallback
 
 If MCP tools are unavailable, use the `azure-ai-projects` SDK:
-- See [SDK Operations](references/sdk-operations.md) for create, list, update, delete code samples
-- See [Agent Tools](references/tools/prompt-agent/agent-tools.md) for adding tools to agents
+- See [SDK Operations](./references/sdk-operations.md) for create, list, update, delete code samples
+- See [Agent Tools](references/tools--prompt-agent--agent-tools.md) for adding tools to agents
 
 ### Step 4: Add Tools (Optional)
 
@@ -65,13 +65,13 @@ If MCP tools are unavailable, use the `azure-ai-projects` SDK:
 
 | Tool Category | Reference |
 |---------------|-----------|
-| Code Interpreter, Function Calling | [Simple Tools](references/tools/prompt-agent/agent-tools.md) |
-| File Search (requires vector store) | [File Search](references/tools/prompt-agent/tool-file-search.md) |
-| Web Search (default, no setup needed) | [Web Search](references/tools/prompt-agent/tool-web-search.md) |
-| Bing Grounding (explicit request only) | [Bing Grounding](references/tools/prompt-agent/tool-bing-grounding.md) |
-| Azure AI Search (private data) | [Azure AI Search](references/tools/prompt-agent/tool-azure-ai-search.md) |
-| MCP Servers | [MCP Tool](references/tools/prompt-agent/tool-mcp.md) |
-| Memory (persistent across sessions) | [Memory](references/tools/prompt-agent/tool-memory.md) |
+| Code Interpreter, Function Calling | [Simple Tools](references/tools--prompt-agent--agent-tools.md) |
+| File Search (requires vector store) | [File Search](references/tools--prompt-agent--tool-file-search.md) |
+| Web Search (default, no setup needed) | [Web Search](references/tools--prompt-agent--tool-web-search.md) |
+| Bing Grounding (explicit request only) | [Bing Grounding](references/tools--prompt-agent--tool-bing-grounding.md) |
+| Azure AI Search (private data) | [Azure AI Search](references/tools--prompt-agent--tool-azure-ai-search.md) |
+| MCP Servers | [MCP Tool](references/tools--prompt-agent--tool-mcp.md) |
+| Memory (persistent across sessions) | [Memory](references/tools--prompt-agent--tool-memory.md) |
 | Connections (for tools that need them) | [Project Connections](../../project/connections.md) |
 
 > ⚠️ **Web Search Default:** Use `WebSearchPreviewTool` for web search. Only use `BingGroundingTool` when the user explicitly requests Bing Grounding.
@@ -81,7 +81,7 @@ If MCP tools are unavailable, use the `azure-ai-projects` SDK:
 | Error | Cause | Resolution |
 |-------|-------|------------|
 | Agent creation fails | Missing model deployment | Deploy a model first via `foundry_models_deploy` or portal |
-| MCP tool not found | MCP server not running | Fall back to SDK — see [SDK Operations](references/sdk-operations.md) |
+| MCP tool not found | MCP server not running | Fall back to SDK — see [SDK Operations](./references/sdk-operations.md) |
 | MCP agent operation returns `403 Forbidden` | Insufficient RBAC | Need `Foundry User` role on the project |
 | Permission denied | Insufficient RBAC | Need `Foundry User` role on the project |
 | Agent name conflict | Name already exists | Use a unique name or update the existing agent |

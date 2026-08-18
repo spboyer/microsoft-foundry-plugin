@@ -2,7 +2,7 @@
 
 Attach a remote MCP server that accepts an **Entra ID token minted for a Foundry-managed identity** — no user in the loop, no stored secret. Foundry acquires the token and presents it to the server; you authorize the identity on the target server before the agent invokes it. Needs a **connection** (`--kind remote-tool --auth-type agentic-identity` or `project-managed-identity`) scoped to the upstream resource via `--audience`; the toolbox references it by name and the created tool carries a populated `project_connection_id`.
 
-Use this when the MCP server accepts an **app-only** service-principal token (not a user's) — e.g. the Microsoft-hosted Azure Language MCP, or your own Azure Functions MCP behind Easy Auth. For per-user identity instead, see [tool-mcp-user-entra-token.md](tool-mcp-user-entra-token.md).
+Use this when the MCP server accepts an **app-only** service-principal token (not a user's) — e.g. the Microsoft-hosted Azure Language MCP, or your own Azure Functions MCP behind Easy Auth. For per-user identity instead, see [tool-mcp-user-entra-token.md](./tool-mcp-user-entra-token.md).
 
 > 🚦 Before creating a toolbox/connection either way, read [create-hosted.md → Toolbox creation boundary](../../create/create-hosted.md#toolbox-creation-boundary).
 
@@ -138,5 +138,5 @@ Test project-managed-identity wiring first (it resolves without an agent). Troub
 
 - [MCP tool documentation](https://learn.microsoft.com/azure/foundry/agents/how-to/tools/model-context-protocol)
 - [Azure Language MCP server](https://learn.microsoft.com/azure/ai-services/language-service/concepts/foundry-tools-agents)
-- [tool-mcp-user-entra-token.md](tool-mcp-user-entra-token.md) — per-user identity variant
+- [tool-mcp-user-entra-token.md](./tool-mcp-user-entra-token.md) — per-user identity variant
 - [toolbox.md § Supported tool types](../toolbox.md#supported-tool-types)

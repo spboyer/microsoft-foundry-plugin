@@ -152,7 +152,7 @@ azd deploy agent-tools
 
 ## Verify & deploy
 
-After creating the toolbox either way, verify its MCP endpoint end-to-end — see [test-endpoint.md](test-endpoint.md). The tool surfaces under the `name` you gave it (e.g. `search`) and `tools/call` takes a `query`:
+After creating the toolbox either way, verify its MCP endpoint end-to-end — see [test-endpoint.md](./test-endpoint.md). The tool surfaces under the `name` you gave it (e.g. `search`) and `tools/call` takes a `query`:
 
 ```bash
 TOK=$(az account get-access-token --resource "https://ai.azure.com" --query accessToken -o tsv)

@@ -93,7 +93,7 @@ The agent references the toolbox **by name** (`TOOLBOX_NAME`), so the MCP endpoi
 
 ## Verify & deploy
 
-After creating the toolbox either way, verify its MCP endpoint end-to-end (bearer token + raw `tools/list` / `tools/call`) — see [test-endpoint.md](test-endpoint.md).
+After creating the toolbox either way, verify its MCP endpoint end-to-end (bearer token + raw `tools/list` / `tools/call`) — see [test-endpoint.md](./test-endpoint.md).
 
 ---
 

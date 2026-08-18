@@ -258,7 +258,7 @@ This step runs automatically after deploy. Ask the user which source to use and 
 | Schema fetch failed | Verify endpoint format: `https://<resource>.services.ai.azure.com/api/projects/<project>`. |
 | Agent creation failed | Use `agent_definition_schema_get` to verify the definition. |
 | Permission denied | User needs `Foundry User` role on the project. |
-| Model not found | Deploy the model first via [models/deploy-model](../../models/deploy-model/SKILL.md). |
+| Model not found | Deploy the model first via [models/deploy-model](../../models/deploy-model/deploy-model-skill.md). |
 
 ## Display agent details (both flows)
 

@@ -60,7 +60,7 @@ Flag any evaluator where the latest run scored **lower** than the previous run:
 |-----------|--------------|-------------|-------|-------|
 | Relevance | 4.0 | 3.6 | -0.4 (-10%) | ⚠️ **REGRESSION** |
 
-> ⚠️ **Regression detected:** Relevance dropped 10% from v3 to v4. Investigate prompt changes or dataset drift. See [Eval Regression](eval-regression.md) for automated analysis.
+> ⚠️ **Regression detected:** Relevance dropped 10% from v3 to v4. Investigate prompt changes or dataset drift. See [Eval Regression](./eval-regression.md) for automated analysis.
 
 ### Trend Visualization (Text-based)
 
@@ -90,6 +90,6 @@ Present an executive summary:
 
 ## Next Steps
 
-- **Investigate regression** → [Eval Regression](eval-regression.md)
-- **Compare specific versions** → [Dataset Comparison](dataset-comparison.md)
+- **Investigate regression** → [Eval Regression](./eval-regression.md)
+- **Compare specific versions** → [Dataset Comparison](./dataset-comparison.md)
 - **Set up automated monitoring** → [observe skill CI/CD](../../observe/references/cicd-monitoring.md)

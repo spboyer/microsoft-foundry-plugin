@@ -93,7 +93,7 @@ azd deploy agent-tools
 
 ## Verify & deploy
 
-After creating the toolbox either way, verify its MCP endpoint end-to-end — see [test-endpoint.md](test-endpoint.md). Fabric IQ resolves its connection at **list** time, so `tools/list` requires a valid connection (an invalid one returns `Connection resolution failed for '<conn>'`). With a real Fabric connection, `tools/list` surfaces the Fabric MCP sub-tools and `tools/call` queries the artifact.
+After creating the toolbox either way, verify its MCP endpoint end-to-end — see [test-endpoint.md](./test-endpoint.md). Fabric IQ resolves its connection at **list** time, so `tools/list` requires a valid connection (an invalid one returns `Connection resolution failed for '<conn>'`). With a real Fabric connection, `tools/list` surfaces the Fabric MCP sub-tools and `tools/call` queries the artifact.
 
 ---
 

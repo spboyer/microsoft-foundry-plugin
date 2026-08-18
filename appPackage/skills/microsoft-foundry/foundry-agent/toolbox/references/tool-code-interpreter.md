@@ -76,7 +76,7 @@ The agent references the toolbox **by name** (`TOOLBOX_NAME`), so the MCP endpoi
 
 ## Verify & deploy
 
-After creating the toolbox either way, verify its MCP endpoint end-to-end — see [test-endpoint.md](test-endpoint.md). A raw `tools/call` executes Python directly:
+After creating the toolbox either way, verify its MCP endpoint end-to-end — see [test-endpoint.md](./test-endpoint.md). A raw `tools/call` executes Python directly:
 
 ```bash
 TOK=$(az account get-access-token --resource "https://ai.azure.com" --query accessToken -o tsv)

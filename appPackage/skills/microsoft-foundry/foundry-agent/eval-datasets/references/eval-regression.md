@@ -116,6 +116,6 @@ Include regression checks in automated pipelines. See [observe skill CI/CD](../.
 
 ## Next Steps
 
-- **View full trend history** → [Eval Trending](eval-trending.md)
+- **View full trend history** → [Eval Trending](./eval-trending.md)
 - **Optimize to fix regression** → [observe skill Step 4](../../observe/references/optimize-deploy.md)
 - **Roll back if critical** → [deploy skill](../../deploy/deploy.md)

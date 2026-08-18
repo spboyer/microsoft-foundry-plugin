@@ -15,9 +15,10 @@ git -C "$upstream_dir" checkout --quiet --detach FETCH_HEAD
 
 rsync -a --delete \
   "$upstream_dir/skills/microsoft-foundry/" \
-  "$repo_root/appPackage/skills/microsoft-foundry/"
+  "$repo_root/upstream/microsoft-foundry/"
 
 cp "$upstream_dir/LICENSE" "$repo_root/LICENSE"
+node "$repo_root/scripts/build-skill.mjs"
 
 commit="$(git -C "$upstream_dir" rev-parse HEAD)"
 printf 'Synced microsoft/azure-skills@%s\n' "$commit"

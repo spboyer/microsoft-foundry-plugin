@@ -59,7 +59,7 @@ Stored shape: `category=RemoteTool, authType=UserEntraToken, audience=fdcc1f02-�
 
 # B. Custom OAuth (BYO Entra app)
 
-Bring your own Entra app granted the `WorkIQAgent.Ask` delegated permission. The mechanics (five OAuth inputs, redirect-URI registration, `-32006` consent gate) are identical to the generic BYO-OAuth2 flow — see [tool-mcp-custom-oauth.md](tool-mcp-custom-oauth.md); the Work IQ specifics are below.
+Bring your own Entra app granted the `WorkIQAgent.Ask` delegated permission. The mechanics (five OAuth inputs, redirect-URI registration, `-32006` consent gate) are identical to the generic BYO-OAuth2 flow — see [tool-mcp-custom-oauth.md](./tool-mcp-custom-oauth.md); the Work IQ specifics are below.
 
 ```bash
 WORKIQ_APP=fdcc1f02-fc51-4226-8753-f668596af7f7
@@ -96,7 +96,7 @@ REDIR=$(az rest --method get --query "properties.redirectUrl" -o tsv \
 az ad app update --id "$BYO" --web-redirect-uris "$REDIR"
 ```
 
-The first `tools/list` returns a `-32006` consent URL; the user opens it once, then tools resolve. See [tool-mcp-custom-oauth.md § Set the connector redirect URI](tool-mcp-custom-oauth.md#set-the-connector-redirect-uri-after-the-connection-exists) and [§ Verify](tool-mcp-custom-oauth.md#verify).
+The first `tools/list` returns a `-32006` consent URL; the user opens it once, then tools resolve. See [tool-mcp-custom-oauth.md § Set the connector redirect URI](./tool-mcp-custom-oauth.md#set-the-connector-redirect-uri-after-the-connection-exists) and [§ Verify](./tool-mcp-custom-oauth.md#verify).
 
 ---
 
@@ -126,7 +126,7 @@ Set **`FOUNDRY_PROJECT_ENDPOINT` and `AZURE_SUBSCRIPTION_ID`** in the azd env (a
 
 ## Verify & deploy
 
-After creating the toolbox, verify its MCP endpoint end-to-end — see [test-endpoint.md](test-endpoint.md).
+After creating the toolbox, verify its MCP endpoint end-to-end — see [test-endpoint.md](./test-endpoint.md).
 
 ```bash
 ENDPOINT=$(azd ai toolbox show agent-tools --project-endpoint "$FOUNDRY_PROJECT_ENDPOINT" --output json \
@@ -144,5 +144,5 @@ curl -sS -X POST "$ENDPOINT" -H "Authorization: Bearer $TOKEN" -H "Content-Type:
 
 - [Work IQ tool documentation](https://learn.microsoft.com/azure/foundry/agents/how-to/tools/work-iq)
 - [MCP server authentication](https://learn.microsoft.com/azure/ai-foundry/agents/how-to/mcp-authentication) — Entra identities, OAuth identity passthrough, managed vs custom OAuth
-- [tool-mcp-custom-oauth.md](tool-mcp-custom-oauth.md) — the BYO-OAuth2 flow used by path B
+- [tool-mcp-custom-oauth.md](./tool-mcp-custom-oauth.md) — the BYO-OAuth2 flow used by path B
 - [toolbox.md § Supported tool types](../toolbox.md#supported-tool-types)

@@ -21,16 +21,16 @@ USE FOR: evaluate my agent, run an eval, test my agent, check agent quality, run
 
 | User Intent | Start At |
 |-------------|----------|
-| "Deploy and evaluate my agent" | [Step 1: Auto-Setup Evaluation Suite](references/deploy-and-setup.md) (deploy first via [deploy skill](../deploy/deploy.md)) |
-| "Agent just deployed" / "Set up evaluation" | [Step 1: Auto-Setup Evaluation Suite](references/deploy-and-setup.md) (skip deploy, run suite generation) |
-| "Evaluate my agent" / "Run an eval" | [Step 1: Auto-Setup Evaluation Suite](references/deploy-and-setup.md) first if `.foundry/evaluators/`, `.foundry/datasets/`, or `suiteName` cache is missing, stale, or the user requests refresh, then [Step 2: Evaluate](references/evaluate-step.md) |
-| "Why did my eval fail?" / "Analyze results" | [Step 3: Analyze](references/analyze-results.md) |
-| "Improve my agent" / "Optimize prompt" | [Step 4: Optimize](references/optimize-deploy.md) |
-| "Compare agent versions" | [Step 5: Compare](references/compare-iterate.md) |
-| "Set up CI/CD evals" | [Step 6: CI/CD & Monitoring](references/cicd-monitoring.md) |
-| "Enable continuous monitoring" / "Set up production monitoring" / "Evaluation results dropping" | [Continuous Eval](references/continuous-eval.md) |
+| "Deploy and evaluate my agent" | [Step 1: Auto-Setup Evaluation Suite](./references/deploy-and-setup.md) (deploy first via [deploy skill](../deploy/deploy.md)) |
+| "Agent just deployed" / "Set up evaluation" | [Step 1: Auto-Setup Evaluation Suite](./references/deploy-and-setup.md) (skip deploy, run suite generation) |
+| "Evaluate my agent" / "Run an eval" | [Step 1: Auto-Setup Evaluation Suite](./references/deploy-and-setup.md) first if `.foundry/evaluators/`, `.foundry/datasets/`, or `suiteName` cache is missing, stale, or the user requests refresh, then [Step 2: Evaluate](./references/evaluate-step.md) |
+| "Why did my eval fail?" / "Analyze results" | [Step 3: Analyze](./references/analyze-results.md) |
+| "Improve my agent" / "Optimize prompt" | [Step 4: Optimize](./references/optimize-deploy.md) |
+| "Compare agent versions" | [Step 5: Compare](./references/compare-iterate.md) |
+| "Set up CI/CD evals" | [Step 6: CI/CD & Monitoring](./references/cicd-monitoring.md) |
+| "Enable continuous monitoring" / "Set up production monitoring" / "Evaluation results dropping" | [Continuous Eval](./references/continuous-eval.md) |
 
-> ⚠️ **Important:** Before running any evaluation (Step 2), always resolve the selected agent root, environment, effective deployment context, and metadata overlay file. In azd projects, derive project endpoint and deployed agent identity from `azd env get-values`; use metadata for synced suite/cache refs and explicit overrides. Inspect `.foundry/evaluators/`, `.foundry/datasets/`, `.foundry/suites/`, and matching `eval.yaml` in that root only. If the selected suite has `suiteName`, confirm it with `evaluation_suite_get`; otherwise use verified eval.yaml or legacy dataset/evaluator metadata. If cache is missing, stale, or the user wants to refresh it, route through [Step 1: Auto-Setup](references/deploy-and-setup.md) first — even if the user only asked to "evaluate." Do **not** merge `.foundry` cache or source context from sibling agent folders or sibling metadata files.
+> ⚠️ **Important:** Before running any evaluation (Step 2), always resolve the selected agent root, environment, effective deployment context, and metadata overlay file. In azd projects, derive project endpoint and deployed agent identity from `azd env get-values`; use metadata for synced suite/cache refs and explicit overrides. Inspect `.foundry/evaluators/`, `.foundry/datasets/`, `.foundry/suites/`, and matching `eval.yaml` in that root only. If the selected suite has `suiteName`, confirm it with `evaluation_suite_get`; otherwise use verified eval.yaml or legacy dataset/evaluator metadata. If cache is missing, stale, or the user wants to refresh it, route through [Step 1: Auto-Setup](./references/deploy-and-setup.md) first — even if the user only asked to "evaluate." Do **not** merge `.foundry` cache or source context from sibling agent folders or sibling metadata files.
 
 ## Before Starting — Detect Current State
 
@@ -119,4 +119,4 @@ promptText: |
 | "Analyze production traces" / "Search conversations" / "Find errors in App Insights" | [trace skill](../trace/trace.md) |
 | "Debug hosted agent issues" / "Hosted-agent logs" | [troubleshoot skill](../troubleshoot/troubleshoot.md) |
 | "Deploy or redeploy agent" | [deploy skill](../deploy/deploy.md) |
-| "Enable continuous evaluation" / "Set up ongoing monitoring" | [Continuous Eval](references/continuous-eval.md) (reference within this skill) |
+| "Enable continuous evaluation" / "Set up ongoing monitoring" | [Continuous Eval](./references/continuous-eval.md) (reference within this skill) |

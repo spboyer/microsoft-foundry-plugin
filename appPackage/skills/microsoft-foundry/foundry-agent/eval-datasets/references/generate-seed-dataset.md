@@ -184,6 +184,6 @@ Update `.foundry/datasets/manifest.json` by appending a new entry to the `datase
 ## Next Steps
 
 - **Run evaluation** → [observe skill Step 2](../../observe/references/evaluate-step.md)
-- **Curate or edit rows** → [Dataset Curation](dataset-curation.md)
-- **Version after edits** → [Dataset Versioning](dataset-versioning.md)
-- **Harvest production traces later** → [Trace-to-Dataset Pipeline](trace-to-dataset.md)
+- **Curate or edit rows** → [Dataset Curation](./dataset-curation.md)
+- **Version after edits** → [Dataset Versioning](./dataset-versioning.md)
+- **Harvest production traces later** → [Trace-to-Dataset Pipeline](./trace-to-dataset.md)

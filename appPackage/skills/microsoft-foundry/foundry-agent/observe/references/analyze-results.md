@@ -132,4 +132,4 @@ When the user wants to inspect a specific cluster, display the individual rows: 
 
 ## Next Steps
 
-After clustering -> proceed to [Step 6: Optimize Prompt](optimize-deploy.md).
+After clustering -> proceed to [Step 6: Optimize Prompt](./optimize-deploy.md).

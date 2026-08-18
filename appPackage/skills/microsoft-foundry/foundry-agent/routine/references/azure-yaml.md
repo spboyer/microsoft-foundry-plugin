@@ -40,7 +40,7 @@ azd up
 - Trigger `type`: `schedule` (recurring cron), `timer` (one-shot), `github_issue`, or `custom`.
 - Action `type`: `invoke_agent_responses_api` (resume with `conversation`) or `invoke_agent_invocations_api` (resume with `session_id`).
 
-The `azd ai routine` CLI accepts friendlier aliases (`recurring`, `github-issue`, `agent-response`, `agent-invoke`) for the same values. See the full alias-to-wire mapping and per-trigger key fields in [CLI CRUD and Operations](cli-crud.md#vocabulary-cli-aliases-vs-manifest-values).
+The `azd ai routine` CLI accepts friendlier aliases (`recurring`, `github-issue`, `agent-response`, `agent-invoke`) for the same values. See the full alias-to-wire mapping and per-trigger key fields in [CLI CRUD and Operations](./cli-crud.md#vocabulary-cli-aliases-vs-manifest-values).
 
 ## `action.input`
 

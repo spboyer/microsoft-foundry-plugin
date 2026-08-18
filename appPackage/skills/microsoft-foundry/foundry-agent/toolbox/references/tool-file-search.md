@@ -96,7 +96,7 @@ azd deploy agent-tools
 
 ## Verify & deploy
 
-After creating the toolbox either way, verify its MCP endpoint end-to-end — see [test-endpoint.md](test-endpoint.md).
+After creating the toolbox either way, verify its MCP endpoint end-to-end — see [test-endpoint.md](./test-endpoint.md).
 
 ---
 

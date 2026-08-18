@@ -48,7 +48,7 @@ Protocol examples:
 azd ai agent invoke --protocol invocations --input-file request.json
 ```
 
-For invocations, inspect the agent source or OpenAPI contract before preparing the request body. See [Invocations Protocol Guide](references/invocations-protocol.md) for request schema discovery and examples.
+For invocations, inspect the agent source or OpenAPI contract before preparing the request body. See [Invocations Protocol Guide](./references/invocations-protocol.md) for request schema discovery and examples.
 
 Outside an azd project, use a full protocol endpoint supplied by the user or previously returned by `azd ai agent show`:
 
@@ -79,11 +79,11 @@ A normal remote invoke does not require a separate session create command. azd r
 
 For the responses protocol, azd creates a platform-managed conversation and can persist its `conversationId` for reuse. Use `--new-conversation` to reset response history or `--conversation-id <id>` to select one. For invocations, memory is session-backed, so `--new-conversation` has no effect.
 
-Use explicit session commands only when a session must exist before invoke or file operations, or when inspecting and controlling its lifecycle. Read [Session Management](references/session-management.md).
+Use explicit session commands only when a session must exist before invoke or file operations, or when inspecting and controlling its lifecycle. Read [Session Management](./references/session-management.md).
 
 ### Step 4: Manage Files and Logs
 
-File commands use the session saved by invoke or explicit session creation unless `--session-id` overrides it. Read [File Operations](references/file-operations.md).
+File commands use the session saved by invoke or explicit session creation unless `--session-id` overrides it. Read [File Operations](./references/file-operations.md).
 
 Use the same saved session for logs:
 
@@ -132,8 +132,8 @@ Prompt Agents do not use hosted sessions or hosted file operations.
 
 ## References
 
-- [Session Management](references/session-management.md)
-- [File Operations](references/file-operations.md)
-- [Invocations Protocol Guide](references/invocations-protocol.md)
+- [Session Management](./references/session-management.md)
+- [File Operations](./references/file-operations.md)
+- [Invocations Protocol Guide](./references/invocations-protocol.md)
 - [Foundry Hosted Agents](https://learn.microsoft.com/en-us/azure/ai-foundry/agents/concepts/hosted-agents?view=foundry)
 - [Foundry Samples](https://github.com/azure-ai-foundry/foundry-samples)

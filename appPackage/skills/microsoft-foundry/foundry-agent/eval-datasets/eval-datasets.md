@@ -25,16 +25,16 @@ USE FOR: create dataset from traces, harvest traces into dataset, build test dat
 
 | User Intent | Start At |
 |-------------|----------|
-| "Create dataset from production traces" / "Harvest traces" | [Trace-to-Dataset Pipeline](references/trace-to-dataset.md) |
-| "Version my dataset" / "Tag dataset" / "Pin dataset version" | [Dataset Versioning](references/dataset-versioning.md) |
-| "Organize my datasets" / "Dataset splits" / "Filter datasets" | [Dataset Organization](references/dataset-organization.md) |
-| "Review trace candidates" / "Curate test cases" | [Dataset Curation](references/dataset-curation.md) |
-| "Show eval metrics over time" / "Evaluation trending" | [Eval Trending](references/eval-trending.md) |
-| "Did my agent regress?" / "Regression detection" | [Eval Regression](references/eval-regression.md) |
-| "Compare datasets" / "Experiment comparison" / "A/B test" | [Dataset Comparison](references/dataset-comparison.md) |
-| "Sync dataset to Foundry" / "Refresh local dataset cache" | [Trace-to-Dataset Pipeline -> Step 5](references/trace-to-dataset.md#step-5--sync-local-cache-with-foundry-optional) |
-| "Trace my evaluation lineage" / "Audit eval history" | [Eval Lineage](references/eval-lineage.md) |
-| "Generate eval dataset" / "Create seed dataset" / "Generate test cases for my agent" | [Generate Seed Dataset](references/generate-seed-dataset.md) |
+| "Create dataset from production traces" / "Harvest traces" | [Trace-to-Dataset Pipeline](./references/trace-to-dataset.md) |
+| "Version my dataset" / "Tag dataset" / "Pin dataset version" | [Dataset Versioning](./references/dataset-versioning.md) |
+| "Organize my datasets" / "Dataset splits" / "Filter datasets" | [Dataset Organization](./references/dataset-organization.md) |
+| "Review trace candidates" / "Curate test cases" | [Dataset Curation](./references/dataset-curation.md) |
+| "Show eval metrics over time" / "Evaluation trending" | [Eval Trending](./references/eval-trending.md) |
+| "Did my agent regress?" / "Regression detection" | [Eval Regression](./references/eval-regression.md) |
+| "Compare datasets" / "Experiment comparison" / "A/B test" | [Dataset Comparison](./references/dataset-comparison.md) |
+| "Sync dataset to Foundry" / "Refresh local dataset cache" | [Trace-to-Dataset Pipeline -> Step 5](./references/trace-to-dataset.md#step-5--sync-local-cache-with-foundry-optional) |
+| "Trace my evaluation lineage" / "Audit eval history" | [Eval Lineage](./references/eval-lineage.md) |
+| "Generate eval dataset" / "Create seed dataset" / "Generate test cases for my agent" | [Generate Seed Dataset](./references/generate-seed-dataset.md) |
 | "Regenerate dataset" / "Refresh synthetic data" / "Generate from traces without full suite" | [Generated Data Refresh](../observe/references/evaluation-suite-generation.md#regenerate-one-artifact) |
 
 ## Before Starting — Detect Current State

@@ -52,7 +52,7 @@ Use `microsoft_docs_search` to verify any technical fact before presenting it to
 
 ## Step 1 — Gather Requirements
 
-Read [references/intake.md](references/intake.md). One pass, three tiers:
+Read [references/intake.md](./references/intake.md). One pass, three tiers:
 - **Tier 1 (Core):** Subscription, VNet model, agents, region, RG, VNet — determine approach at the end
 - **Tier 2 (Architecture):** DNS, topology, NSG, on-prem, identity, BYO resources
 - **Tier 3 (Enterprise):** Model, client access, auth, policies, monitoring
@@ -63,13 +63,13 @@ Determine the approach (official template / adapt closest / extend user’s IaC)
 
 ## Step 2 — Plan Generation
 
-Use the confirmed requirements from [references/intake.md](references/intake.md).
+Use the confirmed requirements from [references/intake.md](./references/intake.md).
 
-**OFFICIAL path:** Load the template's README from its GitHub URL (via [references/template-index.md](references/template-index.md)). Run `microsoft_docs_search` for its prerequisites. Present a deployment plan using the user's actual values.
+**OFFICIAL path:** Load the template's README from its GitHub URL (via [references/template-index.md](./references/template-index.md)). Run `microsoft_docs_search` for its prerequisites. Present a deployment plan using the user's actual values.
 
 **ADAPT path:** Load the closest template's README. Present a deployment plan highlighting what will be modified from the base template.
 
-**EXTEND path:** Load [references/custom-template-adaptation.md](references/custom-template-adaptation.md). Read the user's existing template. Follow the gap analysis framework to present what's covered, what's missing, and any issues. Get approval before modifying.
+**EXTEND path:** Load [references/custom-template-adaptation.md](./references/custom-template-adaptation.md). Read the user's existing template. Follow the gap analysis framework to present what's covered, what's missing, and any issues. Get approval before modifying.
 
 Get confirmation before proceeding.
 
@@ -77,7 +77,7 @@ Get confirmation before proceeding.
 
 ## Step 3 — Scaffold & Parameterize
 
-Read [references/scaffold.md](references/scaffold.md).
+Read [references/scaffold.md](./references/scaffold.md).
 
 ---
 
@@ -105,15 +105,15 @@ az cognitiveservices account list-skus --location <region> --kind AIServices -o 
 
 ## Step 5 — Deploy & Track
 
-**OFFICIAL / ADAPT path:** Read [references/deploy.md](references/deploy.md) for deployment command, monitoring, and error recovery.
+**OFFICIAL / ADAPT path:** Read [references/deploy.md](./references/deploy.md) for deployment command, monitoring, and error recovery.
 
-**EXTEND path:** Deploy using the user's existing deployment workflow (their CLI commands, pipeline, or CI/CD). The monitoring and error recovery guidance in [references/deploy.md](references/deploy.md) still applies.
+**EXTEND path:** Deploy using the user's existing deployment workflow (their CLI commands, pipeline, or CI/CD). The monitoring and error recovery guidance in [references/deploy.md](./references/deploy.md) still applies.
 
 ---
 
 ## Step 6 — Test & Validate
 
-Read [references/post-deployment-validation.md](references/post-deployment-validation.md). These checks apply to all paths — PE verification, RBAC audit, `publicNetworkAccess` audit, and end-to-end agent test work regardless of how the infrastructure was deployed.
+Read [references/post-deployment-validation.md](./references/post-deployment-validation.md). These checks apply to all paths — PE verification, RBAC audit, `publicNetworkAccess` audit, and end-to-end agent test work regardless of how the infrastructure was deployed.
 
 If any test fails, run `microsoft_docs_search` for the error before attempting remediation.
 
@@ -121,6 +121,6 @@ If any test fails, run `microsoft_docs_search` for the error before attempting r
 
 ## Error Handling
 
-> ⚠️ **Critical retry rule:** If a deployment fails after the capability host step starts, a service association (`legionservicelink`) stays on the agent subnet. Simplest retry: use a **new VNet name**. To reuse the same subnet, first purge the account and delete the capability host, then wait for the link to clear before redeploying. See [references/deploy.md](references/deploy.md).
+> ⚠️ **Critical retry rule:** If a deployment fails after the capability host step starts, a service association (`legionservicelink`) stays on the agent subnet. Simplest retry: use a **new VNet name**. To reuse the same subnet, first purge the account and delete the capability host, then wait for the link to clear before redeploying. See [references/deploy.md](./references/deploy.md).
 
 For all other errors, check `microsoft_docs_search` for current remediation before acting.

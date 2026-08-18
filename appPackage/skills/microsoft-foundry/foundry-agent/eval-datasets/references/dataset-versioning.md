@@ -59,7 +59,7 @@ Use `evaluation_dataset_get` without a name to list all datasets in the project:
 evaluation_dataset_get(projectEndpoint)
 ```
 
-> 💡 **Tip:** Server-side versions are available after syncing via [Trace-to-Dataset → Step 5](trace-to-dataset.md#step-5--sync-local-cache-with-foundry-optional). Local `manifest.json` remains useful for lineage metadata (source, harvestRule, reviewedBy) not stored server-side.
+> 💡 **Tip:** Server-side versions are available after syncing via [Trace-to-Dataset → Step 5](./trace-to-dataset.md#step-5--sync-local-cache-with-foundry-optional). Local `manifest.json` remains useful for lineage metadata (source, harvestRule, reviewedBy) not stored server-side.
 
 ## Manifest File
 
@@ -123,7 +123,7 @@ Keep `stage` stable for the dataset family (`seed`, `traces`, `curated`, or `pro
 
 1. **Check existing versions**: Read `.foundry/datasets/manifest.json` to find the latest version number
 2. **Increment version**: Use `v<N+1>` as the new version
-3. **Create dataset**: Via [Trace-to-Dataset](trace-to-dataset.md) or manual JSONL creation
+3. **Create dataset**: Via [Trace-to-Dataset](./trace-to-dataset.md) or manual JSONL creation
 4. **Update manifest**: Add the new entry with metadata
 5. **Tag appropriately**: Apply `baseline`, `prod`, or other tags as needed
 6. **Deprecate old**: Optionally mark previous versions as `deprecated`
@@ -176,6 +176,6 @@ diff /tmp/v2-queries.txt /tmp/v3-queries.txt
 
 ## Next Steps
 
-- **Organize into splits** → [Dataset Organization](dataset-organization.md)
+- **Organize into splits** → [Dataset Organization](./dataset-organization.md)
 - **Run evaluation with pinned version** → [observe skill Step 2](../../observe/references/evaluate-step.md)
-- **Track lineage** → [Eval Lineage](eval-lineage.md)
+- **Track lineage** → [Eval Lineage](./eval-lineage.md)

@@ -95,4 +95,4 @@ Present exceptions inline in the span tree at their position in the timeline.
 
 ## Step 5 — Fetch Evaluation Results
 
-See [Eval Correlation](eval-correlation.md) for the full workflow to look up evaluation scores by response ID or conversation ID. Use `gen_ai.response.id` values from Step 1 spans to correlate.
+See [Eval Correlation](./eval-correlation.md) for the full workflow to look up evaluation scores by response ID or conversation ID. Use `gen_ai.response.id` values from Step 1 spans to correlate.

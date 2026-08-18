@@ -39,7 +39,7 @@ When creating a new dataset, assign splits based on rules:
 
 ### Manual Split Assignment
 
-Users can assign splits during [curation](dataset-curation.md) or by editing the JSONL metadata directly.
+Users can assign splits during [curation](./dataset-curation.md) or by editing the JSONL metadata directly.
 
 ## Filtered Evaluation Runs
 
@@ -111,5 +111,5 @@ Present as a table:
 ## Next Steps
 
 - **Run targeted evaluation** → [observe skill Step 2](../../observe/references/evaluate-step.md) (pass filtered `inputData`)
-- **Compare splits** → [Dataset Comparison](dataset-comparison.md)
-- **Track lineage** → [Eval Lineage](eval-lineage.md)
+- **Compare splits** → [Dataset Comparison](./dataset-comparison.md)
+- **Track lineage** → [Eval Lineage](./eval-lineage.md)

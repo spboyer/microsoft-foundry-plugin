@@ -46,7 +46,7 @@ dependencies
 
 Then drill into the full conversation:
 
-> ⚠️ **STOP — read [Conversation Detail](conversation-detail.md) before writing your own drill-down query.** It contains the correct span tree reconstruction logic, event/exception queries, and eval correlation steps.
+> ⚠️ **STOP — read [Conversation Detail](./conversation-detail.md) before writing your own drill-down query.** It contains the correct span tree reconstruction logic, event/exception queries, and eval correlation steps.
 
 Quick drill-down using the `operation_Id` from above:
 
@@ -65,7 +65,7 @@ dependencies
 | order by timestamp asc
 ```
 
-Also check for eval results: see [Eval Correlation](eval-correlation.md).
+Also check for eval results: see [Eval Correlation](./eval-correlation.md).
 
 ## Search by Agent Name
 
@@ -143,7 +143,7 @@ Present results in this format:
 | conv_abc123 | 3 | 2025-01-15 10:30 | 4.2s | 12 | 0 | 850 | 320 |
 | conv_def456 | 4 | 2025-01-15 10:25 | 8.7s | 18 | 2 | 1200 | 450 |
 
-Highlight rows with errors in the summary. Offer to drill into any conversation via [Conversation Detail](conversation-detail.md).
+Highlight rows with errors in the summary. Offer to drill into any conversation via [Conversation Detail](./conversation-detail.md).
 
 ## Free-Text Search
 

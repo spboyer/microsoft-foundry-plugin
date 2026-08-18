@@ -133,7 +133,7 @@ Set **`FOUNDRY_PROJECT_ENDPOINT` and `AZURE_SUBSCRIPTION_ID`** in the azd env (a
 
 ## Verify & deploy against Cat Facts
 
-After creating the toolbox either way, verify its MCP endpoint end-to-end (bearer token + raw `tools/list` / `tools/call`) — see [test-endpoint.md](test-endpoint.md).
+After creating the toolbox either way, verify its MCP endpoint end-to-end (bearer token + raw `tools/list` / `tools/call`) — see [test-endpoint.md](./test-endpoint.md).
 
 With the anonymous Cat Facts spec above: `tools/list` returns `catfacts___getFact`; `tools/call` on it returns a live cat fact (`{"fact": "...", "length": ...}`).
 
@@ -146,7 +146,7 @@ curl -sS -X POST "$ENDPOINT" -H "Authorization: Bearer $TOKEN" -H "Content-Type:
   -d '{"jsonrpc":"2.0","id":3,"method":"tools/call","params":{"name":"catfacts___getFact","arguments":{}}}' | python -m json.tool
 ```
 
-> Multiple `openapi` entries are allowed in one toolbox only if each spec defines a distinct `info.title`. See [toolbox-azd.md § Multi-tool rule](toolbox-azd.md#multi-tool-rule).
+> Multiple `openapi` entries are allowed in one toolbox only if each spec defines a distinct `info.title`. See [toolbox-azd.md § Multi-tool rule](./toolbox-azd.md#multi-tool-rule).
 
 ## References
 

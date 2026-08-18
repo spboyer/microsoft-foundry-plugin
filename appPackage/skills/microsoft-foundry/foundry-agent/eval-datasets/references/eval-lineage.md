@@ -96,7 +96,7 @@ Track lineage in `.foundry/datasets/manifest.json`:
 
 1. Use **`evaluation_get`** to list all evaluation groups
 2. For each group, list runs with `isRequestForRuns=true`
-3. Build the timeline from [Eval Trending](eval-trending.md)
+3. Build the timeline from [Eval Trending](./eval-trending.md)
 4. Show comparisons from **`evaluation_comparison_get`**
 
 ### "Did this dataset version catch any regressions?"
@@ -122,6 +122,6 @@ Update `.foundry/datasets/manifest.json` at each step:
 
 ## Next Steps
 
-- **View metric trends** → [Eval Trending](eval-trending.md)
-- **Check for regressions** → [Eval Regression](eval-regression.md)
-- **Harvest new traces** → [Trace-to-Dataset](trace-to-dataset.md) (start the next cycle)
+- **View metric trends** → [Eval Trending](./eval-trending.md)
+- **Check for regressions** → [Eval Regression](./eval-regression.md)
+- **Harvest new traces** → [Trace-to-Dataset](./trace-to-dataset.md) (start the next cycle)

@@ -78,7 +78,7 @@ azd deploy agent-tools
 
 ## Verify & deploy
 
-After creating the toolbox either way, verify its MCP endpoint end-to-end — see [test-endpoint.md](test-endpoint.md). Browser automation surfaces as MCP sub-tools under your `name` prefix (e.g. `browser___create_session`, joined by three underscores). Calling them needs a working Playwright workspace + connection.
+After creating the toolbox either way, verify its MCP endpoint end-to-end — see [test-endpoint.md](./test-endpoint.md). Browser automation surfaces as MCP sub-tools under your `name` prefix (e.g. `browser___create_session`, joined by three underscores). Calling them needs a working Playwright workspace + connection.
 
 ---
 

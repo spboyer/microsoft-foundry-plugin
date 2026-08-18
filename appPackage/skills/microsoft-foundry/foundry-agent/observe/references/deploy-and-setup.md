@@ -32,7 +32,7 @@ Inspect `.foundry/suites/`, `.foundry/evaluators/`, `.foundry/datasets/`, matchi
 
 ### 3. Generate Suite
 
-Read [Evaluation Suite Generation](evaluation-suite-generation.md). If the user selected existing `eval.yaml`, follow the local eval.yaml verification/registration path there before creating a generated suite. Otherwise call:
+Read [Evaluation Suite Generation](./evaluation-suite-generation.md). If the user selected existing `eval.yaml`, follow the local eval.yaml verification/registration path there before creating a generated suite. Otherwise call:
 
 ```text
 evaluation_suite_generation_job_create(
@@ -85,4 +85,4 @@ If suite generation fails, is unavailable, or returns incomplete artifacts, expl
 
 Ask: *"Your agent is deployed and the selected environment has evaluation-suite metadata plus local dataset/evaluator references. Would you like to run an evaluation to identify optimization opportunities?"*
 
-If yes -> proceed to [Step 2: Evaluate](evaluate-step.md). If no -> stop.
+If yes -> proceed to [Step 2: Evaluate](./evaluate-step.md). If no -> stop.

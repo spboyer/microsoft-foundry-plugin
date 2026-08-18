@@ -2,7 +2,7 @@
 
 Attach a remote MCP server that authenticates with the **caller's own Entra identity** — the platform forwards the signed-in user's Entra token to the MCP server (auth type `UserEntraToken`), so the server sees the **end user**, not a shared credential. No BYO app registration, client secret, or OAuth consent flow. Needs a **connection** (`--kind remote-tool --auth-type user-entra-token`) scoped to the upstream resource via `--audience`; the toolbox references it by name and the created tool carries a populated `project_connection_id`.
 
-Use this when the MCP server enforces per-user permissions off the caller's Entra identity (e.g. Microsoft 365 / Graph-backed services). [Work IQ](tool-work-iq.md) is a concrete, preview instance of this pattern.
+Use this when the MCP server enforces per-user permissions off the caller's Entra identity (e.g. Microsoft 365 / Graph-backed services). [Work IQ](./tool-work-iq.md) is a concrete, preview instance of this pattern.
 
 > 🚦 Before creating a toolbox/connection either way, read [create-hosted.md → Toolbox creation boundary](../../create/create-hosted.md#toolbox-creation-boundary).
 
@@ -105,7 +105,7 @@ Set **`FOUNDRY_PROJECT_ENDPOINT` and `AZURE_SUBSCRIPTION_ID`** in the azd env (a
 
 ## Verify & deploy
 
-After creating the toolbox either way, verify its MCP endpoint end-to-end (bearer token + raw `tools/list` / `tools/call`) — see [test-endpoint.md](test-endpoint.md).
+After creating the toolbox either way, verify its MCP endpoint end-to-end (bearer token + raw `tools/list` / `tools/call`) — see [test-endpoint.md](./test-endpoint.md).
 
 > The MCP server resolves data as the **calling user's** Entra identity — there is no separate consent step; the toolbox bearer token's identity is forwarded directly. Locally that's your `az login` identity; through a deployed agent it's the invoking user, so results differ by caller. A caller who lacks access to the upstream resource gets an empty or unauthorized result from that server, not a toolbox error.
 
@@ -113,6 +113,6 @@ After creating the toolbox either way, verify its MCP endpoint end-to-end (beare
 
 ## References
 
-- [tool-work-iq.md](tool-work-iq.md) — a concrete, verified user-entra-token MCP server (Microsoft 365 Work IQ)
+- [tool-work-iq.md](./tool-work-iq.md) — a concrete, verified user-entra-token MCP server (Microsoft 365 Work IQ)
 - [MCP tool documentation](https://learn.microsoft.com/azure/foundry/agents/how-to/tools/mcp)
 - [toolbox.md § Supported tool types](../toolbox.md#supported-tool-types)

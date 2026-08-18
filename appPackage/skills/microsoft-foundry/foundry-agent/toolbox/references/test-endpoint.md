@@ -79,16 +79,16 @@ For an **OAuth2** MCP connection (BYO custom app or Foundry-managed connector) w
 - The nested `message` is the **consent URL** (host `logic-apis-<region>.consent.azure-apim.net` — the Foundry connector consent endpoint, **not** a raw `login.microsoftonline.com` URL). Open it in a browser and sign in to grant the connection.
 - After consent, the toolbox caches the token; the same `tools/list` then returns the MCP's tools, and `tools/call` works.
 - This `-32006` gate is the **expected** pre-consent behavior for OAuth2 — not an error to debug. **Consent is per-user, per-connection, per-project**; each new caller hits it once.
-- BYO custom-app connections also require the connection's reply URL to be registered on your OAuth app first — see [tool-mcp-custom-oauth.md § Set the connector redirect URI](tool-mcp-custom-oauth.md#set-the-connector-redirect-uri-after-the-connection-exists).
+- BYO custom-app connections also require the connection's reply URL to be registered on your OAuth app first — see [tool-mcp-custom-oauth.md § Set the connector redirect URI](./tool-mcp-custom-oauth.md#set-the-connector-redirect-uri-after-the-connection-exists).
 
 ### Consent / OAuth troubleshooting
 
 | Symptom | Likely cause / fix |
 |---|---|
 | `tools/list` → `-32006 CONSENT_REQUIRED` | Expected on first use. Open the returned consent URL and sign in; retry. |
-| `tools/list` → `-32007 HTTP_403` after consenting | Consent succeeded, but the MCP server rejected the token — its Easy Auth doesn't advertise the scope. For a self-built Functions MCP, set `WEBSITE_AUTH_PRM_DEFAULT_WITH_SCOPES=<ENTRA_IDENTIFIER_URI>/user_impersonation` on the Function App (see [tool-mcp-custom-oauth-azure-starter.md](tool-mcp-custom-oauth-azure-starter.md)). |
+| `tools/list` → `-32007 HTTP_403` after consenting | Consent succeeded, but the MCP server rejected the token — its Easy Auth doesn't advertise the scope. For a self-built Functions MCP, set `WEBSITE_AUTH_PRM_DEFAULT_WITH_SCOPES=<ENTRA_IDENTIFIER_URI>/user_impersonation` on the Function App (see [tool-mcp-custom-oauth-azure-starter.md](./tool-mcp-custom-oauth-azure-starter.md)). |
 | `tools/list` → `-32007 HTTP_404` | Auth passed but the server has no tools at `/runtime/webhooks/mcp` — the MCP code isn't deployed. Publish a sample with `func azure functionapp publish <app>`. |
-| `AADSTS...redirect_uri` mismatch after clicking consent | The connection's reply URL isn't registered on your app. Read `properties.redirectUrl` from the connection and add it to the app's redirect URIs — see [tool-mcp-custom-oauth.md § Set the connector redirect URI](tool-mcp-custom-oauth.md#set-the-connector-redirect-uri-after-the-connection-exists). |
+| `AADSTS...redirect_uri` mismatch after clicking consent | The connection's reply URL isn't registered on your app. Read `properties.redirectUrl` from the connection and add it to the app's redirect URIs — see [tool-mcp-custom-oauth.md § Set the connector redirect URI](./tool-mcp-custom-oauth.md#set-the-connector-redirect-uri-after-the-connection-exists). |
 | `invalid_client` at the token step | Wrong `--client-secret` (expired/mistyped) or `--client-id`. Reset the secret and recreate the connection. |
 | `tools/list` returns zero after consent | Scope mismatch — `--scopes` must match the MCP's `scopes_supported` from `/.well-known/oauth-protected-resource`. |
 | `tools/call` → `403 ... user may not be registered` | Managed connector backed by a dogfood OAuth app with a test-user allowlist — not fixable client-side. See [foundry-tool-catalog.md dogfood trap](../../create/references/foundry-tool-catalog.md#dogfood-oauth-app-runtime-allowlist-trap). |

@@ -211,7 +211,7 @@ customEvents
 | order by failCount desc
 ```
 
-> For detailed eval queries by response ID or conversation ID, see [Eval Correlation](eval-correlation.md).
+> For detailed eval queries by response ID or conversation ID, see [Eval Correlation](./eval-correlation.md).
 
 ## OTel Reference Links
 

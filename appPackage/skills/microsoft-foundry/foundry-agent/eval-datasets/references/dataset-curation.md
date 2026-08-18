@@ -19,7 +19,7 @@ Raw Traces (from KQL harvest)
 
 ## Step 1 — Generate Candidate File
 
-After running a [trace harvest](trace-to-dataset.md), save candidates with a `status` field:
+After running a [trace harvest](./trace-to-dataset.md), save candidates with a `status` field:
 
 ```
 .foundry/datasets/<agent-name>-traces-candidates-<date>.jsonl
@@ -97,6 +97,6 @@ Before finalizing, verify dataset quality:
 
 ## Next Steps
 
-- **Version the approved dataset** → [Dataset Versioning](dataset-versioning.md)
-- **Organize into splits** → [Dataset Organization](dataset-organization.md)
+- **Version the approved dataset** → [Dataset Versioning](./dataset-versioning.md)
+- **Organize into splits** → [Dataset Organization](./dataset-organization.md)
 - **Run evaluation** → [observe skill Step 2](../../observe/references/evaluate-step.md)

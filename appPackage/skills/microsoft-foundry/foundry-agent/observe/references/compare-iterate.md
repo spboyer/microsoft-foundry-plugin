@@ -8,7 +8,7 @@ Use **`evaluation_agent_batch_eval_create`** for re-evaluation, even when the se
 
 > ⚠️ **Eval-group immutability:** Reuse the same `evaluationId` only when `evaluatorNames` and thresholds are unchanged. If you add/remove evaluators or change thresholds, create a new evaluation group first, then compare runs within that new group.
 
-Auto-poll for completion in a background terminal (same as [Step 2](evaluate-step.md)).
+Auto-poll for completion in a background terminal (same as [Step 2](./evaluate-step.md)).
 
 ## Step 9 — Compare Versions
 
@@ -47,6 +47,6 @@ Then use **`evaluation_comparison_get`** (with the returned `insightId`) to retr
 
 ## Step 10 — Iterate or Finish
 
-If more categories remain in the prioritized action table (from [Step 4](analyze-results.md)), loop back to **Step 5** (dive into next category) → **Step 6** (optimize) → **Step 7** (deploy) → **Step 8** (re-evaluate) → **Step 9** (compare).
+If more categories remain in the prioritized action table (from [Step 4](./analyze-results.md)), loop back to **Step 5** (dive into next category) → **Step 6** (optimize) → **Step 7** (deploy) → **Step 8** (re-evaluate) → **Step 9** (compare).
 
-Otherwise, confirm the final agent version with the user, then prompt for [CI/CD evals & monitoring](cicd-monitoring.md).
+Otherwise, confirm the final agent version with the user, then prompt for [CI/CD evals & monitoring](./cicd-monitoring.md).

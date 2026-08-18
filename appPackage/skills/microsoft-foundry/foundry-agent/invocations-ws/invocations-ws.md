@@ -63,7 +63,7 @@ Inside the handler, read the session id from `FOUNDRY_AGENT_SESSION_ID` (env var
 
 > ⚠️ **You define the wire format.** The platform forwards frames as-is in both directions. There is no schema validation, no OpenAPI registration, no platform-managed history. Document your protocol for callers.
 
-See [Invocations WebSocket Protocol Guide](references/invocations-ws-protocol.md) for the framing model, the `agent_session_id` query parameter, control-vs-data frame patterns, and discovery guidance.
+See [Invocations WebSocket Protocol Guide](./references/invocations-ws-protocol.md) for the framing model, the `agent_session_id` query parameter, control-vs-data frame patterns, and discovery guidance.
 
 ### Step 2: Declare the Protocol in `azure.yaml`
 
@@ -167,7 +167,7 @@ Each sub-folder shows a different media-path strategy (audio entirely over the W
 
 ## Additional Resources
 
-- [Invocations WebSocket Protocol Guide](references/invocations-ws-protocol.md)
+- [Invocations WebSocket Protocol Guide](./references/invocations-ws-protocol.md)
 - [Session Management](../invoke/references/session-management.md)
 - [Foundry Hosted Agents](https://learn.microsoft.com/en-us/azure/ai-foundry/agents/concepts/hosted-agents?view=foundry)
 - [`invoke` skill](../invoke/invoke.md) — HTTP-based `responses` and `invocations` protocols

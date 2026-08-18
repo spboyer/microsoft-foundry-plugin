@@ -26,7 +26,7 @@ Each tool from `tools/list` includes a `_meta.tool_configuration` block with the
 
 ## Testing the toolbox endpoint
 
-Verify the MCP endpoint end-to-end with a bearer token + raw `tools/list` / `tools/call` — see [test-endpoint.md](test-endpoint.md).
+Verify the MCP endpoint end-to-end with a bearer token + raw `tools/list` / `tools/call` — see [test-endpoint.md](./test-endpoint.md).
 
 ## Troubleshooting (create / provision)
 
@@ -35,7 +35,7 @@ Verify the MCP endpoint end-to-end with a bearer token + raw `tools/list` / `too
 | `TOOLBOX_ENDPOINT` not set | Run `azd ai toolbox show` + `azd env set`. |
 | Env var missing in deployed agent | Add to the agent service's `environmentVariables` in `azure.yaml`, `azd deploy`. |
 | `403 Forbidden` (incl. `POST /toolboxes`, connection PUT) | Caller lacks `Foundry User` (or `Azure AI Developer`) on the project — grant at project scope. |
-| 400 `Multiple tools without identifiers found` | Two unnamed tools (or duplicate `server_label`) — keep **at most one unnamed tool**; name each other. See [toolbox-azd.md § Multi-tool rule](toolbox-azd.md#multi-tool-rule). |
+| 400 `Multiple tools without identifiers found` | Two unnamed tools (or duplicate `server_label`) — keep **at most one unnamed tool**; name each other. See [toolbox-azd.md § Multi-tool rule](./toolbox-azd.md#multi-tool-rule). |
 | `tools/list` returns zero | Version still provisioning, or tool type unavailable in region — wait ~10s, retry, or try another region. |
 | `tools/list` zero for MCP/A2A only | Invalid/missing connection creds — verify `project_connection_id`; for MI auth, check RBAC on the target. |
 | `tools/list` zero for OpenAPI only | Invalid OpenAPI spec — validate against 3.0/3.1; for MI auth, verify RBAC. |

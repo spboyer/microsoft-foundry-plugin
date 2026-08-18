@@ -199,10 +199,10 @@ Once you understand the failure pattern, use the [observe skill](../observe.md) 
 
 | Symptom | Action |
 |---------|--------|
-| Quality scores dropping (coherence, relevance, task_adherence) | Run [Step 3: Analyze](analyze-results.md) to cluster failures, then [Step 4: Optimize](optimize-deploy.md) to improve the prompt |
+| Quality scores dropping (coherence, relevance, task_adherence) | Run [Step 3: Analyze](./analyze-results.md) to cluster failures, then [Step 4: Optimize](./optimize-deploy.md) to improve the prompt |
 | Safety evaluators flagging (violence, indirect_attack) | Review flagged traces via [trace skill](../../trace/trace.md), then update agent instructions or tool definitions to address the pattern |
 | Grounding failures | Check whether the agent's data sources are still accessible and returning expected results; update knowledge index or tool configuration |
-| Scores fluctuating after a deploy | Run [Step 5: Compare](compare-iterate.md) between the current and previous agent version to isolate the regression |
+| Scores fluctuating after a deploy | Run [Step 5: Compare](./compare-iterate.md) between the current and previous agent version to isolate the regression |
 
 ### Step 4: Verify the Fix
 

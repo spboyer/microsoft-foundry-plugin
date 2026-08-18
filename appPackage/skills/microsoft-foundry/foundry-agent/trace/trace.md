@@ -25,14 +25,14 @@ USE FOR: analyze agent traces, search agent conversations, find failing traces, 
 
 | User Intent | Start At |
 |-------------|----------|
-| "Search agent conversations" / "Find traces" | [Search Traces](references/search-traces.md) |
-| "Tell me about response ID X" / "Look up response ID" | [Search Traces - Search by Response ID](references/search-traces.md#search-by-response-id) |
-| "Why is my agent failing?" / "Find errors" | [Analyze Failures](references/analyze-failures.md) |
-| "My agent is slow" / "Latency analysis" | [Analyze Latency](references/analyze-latency.md) |
-| "Show me this conversation" / "Trace detail" | [Conversation Detail](references/conversation-detail.md) |
-| "Find eval results for response ID" / "eval scores from traces" | [Eval Correlation](references/eval-correlation.md) |
-| "What KQL do I need?" | [KQL Templates](references/kql-templates.md) |
-| "Auto-detect agent issues" / "Get automated insights" / "What's wrong with my agent?" | [Tracing Insights API](references/tracing-insights-api.md) |
+| "Search agent conversations" / "Find traces" | [Search Traces](./references/search-traces.md) |
+| "Tell me about response ID X" / "Look up response ID" | [Search Traces - Search by Response ID](./references/search-traces.md#search-by-response-id) |
+| "Why is my agent failing?" / "Find errors" | [Analyze Failures](./references/analyze-failures.md) |
+| "My agent is slow" / "Latency analysis" | [Analyze Latency](./references/analyze-latency.md) |
+| "Show me this conversation" / "Trace detail" | [Conversation Detail](./references/conversation-detail.md) |
+| "Find eval results for response ID" / "eval scores from traces" | [Eval Correlation](./references/eval-correlation.md) |
+| "What KQL do I need?" | [KQL Templates](./references/kql-templates.md) |
+| "Auto-detect agent issues" / "Get automated insights" / "What's wrong with my agent?" | [Tracing Insights API](./references/tracing-insights-api.md) |
 
 ## Before Starting — Resolve App Insights Connection
 

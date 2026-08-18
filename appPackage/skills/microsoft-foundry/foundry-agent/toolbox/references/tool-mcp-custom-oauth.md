@@ -35,7 +35,7 @@ Now create the connection (section A), then [Set the connector redirect URI](#se
 
 ## Origin 2 — Azure-hosted MCP you build (starter)
 
-Building your own MCP on Azure Functions? The sample template's `azd up` emits four inputs plus the target; you add a client secret. Recipe: [tool-mcp-custom-oauth-azure-starter.md](tool-mcp-custom-oauth-azure-starter.md).
+Building your own MCP on Azure Functions? The sample template's `azd up` emits four inputs plus the target; you add a client secret. Recipe: [tool-mcp-custom-oauth-azure-starter.md](./tool-mcp-custom-oauth-azure-starter.md).
 
 ---
 
@@ -133,7 +133,7 @@ azd deploy agent-tools
 
 - Set **`FOUNDRY_PROJECT_ENDPOINT` and `AZURE_SUBSCRIPTION_ID`** in the azd env before `azd deploy`, or it errors `infrastructure has not been provisioned`. No `azd provision` / `infra:` block needed.
 - Authed MCP servers (static key, OAuth, agent identity, Entra passthrough) use `project_connection_id`; no-auth servers use inline `server_url`.
-- The `-32006` consent gate still applies — the first `tools/list` triggers one-time consent (see [test-endpoint.md § OAuth consent flow](test-endpoint.md#oauth-consent-flow--32006)).
+- The `-32006` consent gate still applies — the first `tools/list` triggers one-time consent (see [test-endpoint.md § OAuth consent flow](./test-endpoint.md#oauth-consent-flow--32006)).
 
 The agent references the toolbox **by name** (`TOOLBOX_NAME`); the endpoint resolves at runtime. See [use-toolbox-in-hosted-agent.md](../../create/references/use-toolbox-in-hosted-agent.md).
 
@@ -141,7 +141,7 @@ The agent references the toolbox **by name** (`TOOLBOX_NAME`); the endpoint reso
 
 ## Verify
 
-Call `tools/list` against the endpoint — see [test-endpoint.md](test-endpoint.md). The first call for an un-consented user returns the `-32006` consent gate; see [test-endpoint.md § OAuth consent flow](test-endpoint.md#oauth-consent-flow--32006).
+Call `tools/list` against the endpoint — see [test-endpoint.md](./test-endpoint.md). The first call for an un-consented user returns the `-32006` consent gate; see [test-endpoint.md § OAuth consent flow](./test-endpoint.md#oauth-consent-flow--32006).
 
 ## References
 

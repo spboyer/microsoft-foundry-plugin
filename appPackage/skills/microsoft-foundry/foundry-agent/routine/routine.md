@@ -93,11 +93,11 @@ A routine is the same Foundry resource — keyed by its name — no matter how y
 
 ### Way 1 — Imperative: `azd ai routine create`
 
-Create the routine directly against the Foundry project with a single command — flags, or a `--file` manifest when it must carry a stored prompt/payload (`action.input`; there is no `--input` flag). Best for one-off scheduling, quick experiments, ad-hoc CRUD, and working **outside** an azd project — no `azure.yaml` required. → [CLI CRUD and Operations](references/cli-crud.md)
+Create the routine directly against the Foundry project with a single command — flags, or a `--file` manifest when it must carry a stored prompt/payload (`action.input`; there is no `--input` flag). Best for one-off scheduling, quick experiments, ad-hoc CRUD, and working **outside** an azd project — no `azure.yaml` required. → [CLI CRUD and Operations](./references/cli-crud.md)
 
 ### Way 2 — Declarative: `azure.yaml` + `azd deploy`
 
-Declare the routine as a `host: azure.ai.routine` service in `azure.yaml`, then let `azd deploy` / `azd up` upsert it. Best when the routine should be **versioned with the agent in source control** and **reproduced per azd environment** — GitOps, multi-env, CI/CD. → [Declarative Routines](references/azure-yaml.md)
+Declare the routine as a `host: azure.ai.routine` service in `azure.yaml`, then let `azd deploy` / `azd up` upsert it. Best when the routine should be **versioned with the agent in source control** and **reproduced per azd environment** — GitOps, multi-env, CI/CD. → [Declarative Routines](./references/azure-yaml.md)
 
 ### Which path?
 
@@ -107,7 +107,7 @@ Declare the routine as a `host: azure.ai.routine` service in `azure.yaml`, then 
 | Routine versioned with the agent, reproduced per environment, GitOps / CI/CD | Way 2 — declarative |
 | Unsure and already in an azd project with the agent | Way 2 — declarative keeps the routine and agent in sync |
 
-Read, update, enable/disable, manually dispatch, inspect past runs, and delete are imperative-only operations that work on a routine regardless of how it was created — see [CLI CRUD and Operations](references/cli-crud.md).
+Read, update, enable/disable, manually dispatch, inspect past runs, and delete are imperative-only operations that work on a routine regardless of how it was created — see [CLI CRUD and Operations](./references/cli-crud.md).
 
 ## Error Handling
 
@@ -125,8 +125,8 @@ Read, update, enable/disable, manually dispatch, inspect past runs, and delete a
 
 ## Additional Resources
 
-- [CLI CRUD and Operations](references/cli-crud.md)
-- [Declarative Routines](references/azure-yaml.md)
+- [CLI CRUD and Operations](./references/cli-crud.md)
+- [Declarative Routines](./references/azure-yaml.md)
 - [azd ai CLI Reference](../azd-guidance/references/azd-ai-cli.md)
 - [Deploy a Foundry Agent](../deploy/deploy.md) - deploy the agent a routine will invoke
 - [Invoke a Foundry Agent](../invoke/invoke.md) - smoke-test the agent before scheduling it

@@ -1,8 +1,8 @@
 # BYO OAuth2 — Azure-hosted MCP starter (build your own MCP on Functions)
 
-Companion to [tool-mcp-custom-oauth.md](tool-mcp-custom-oauth.md). Use this when you want to **build** the MCP server yourself on Azure Functions (rather than register an OAuth app against a third-party MCP). Deploying the sample template creates the Function App **and** its Entra app registration, so four of the five BYO OAuth2 connection inputs come straight from its outputs — you only add a client secret.
+Companion to [tool-mcp-custom-oauth.md](./tool-mcp-custom-oauth.md). Use this when you want to **build** the MCP server yourself on Azure Functions (rather than register an OAuth app against a third-party MCP). Deploying the sample template creates the Function App **and** its Entra app registration, so four of the five BYO OAuth2 connection inputs come straight from its outputs — you only add a client secret.
 
-Run the steps in order. They set env vars (`FUNC`, `RG`, `APPID`, `IDURI`, `TENANT`) that later steps reuse. Then return to [tool-mcp-custom-oauth.md § A. Imperative CLI](tool-mcp-custom-oauth.md#a-imperative-cli) with the inputs.
+Run the steps in order. They set env vars (`FUNC`, `RG`, `APPID`, `IDURI`, `TENANT`) that later steps reuse. Then return to [tool-mcp-custom-oauth.md § A. Imperative CLI](./tool-mcp-custom-oauth.md#a-imperative-cli) with the inputs.
 
 **Step 1 — Scaffold and provision the Function App + Entra app.**
 
@@ -63,9 +63,9 @@ You now have all five connection inputs:
 | `--token-url` | `https://login.microsoftonline.com/$TENANT/oauth2/v2.0/token` |
 | `--scopes` | `$IDURI/user_impersonation` |
 
-The connection **target** is `https://$FUNC.azurewebsites.net/runtime/webhooks/mcp`. Next: create the connection ([tool-mcp-custom-oauth.md § A](tool-mcp-custom-oauth.md#a-imperative-cli)), then [Set the connector redirect URI](tool-mcp-custom-oauth.md#set-the-connector-redirect-uri-after-the-connection-exists). Tear down with `azd down --purge` (and `az ad app delete --id "$APPID"`) when done.
+The connection **target** is `https://$FUNC.azurewebsites.net/runtime/webhooks/mcp`. Next: create the connection ([tool-mcp-custom-oauth.md § A](./tool-mcp-custom-oauth.md#a-imperative-cli)), then [Set the connector redirect URI](./tool-mcp-custom-oauth.md#set-the-connector-redirect-uri-after-the-connection-exists). Tear down with `azd down --purge` (and `az ad app delete --id "$APPID"`) when done.
 
 ## References
 
 - [Build and register an MCP server (custom MCP on Azure Functions)](https://learn.microsoft.com/en-us/azure/foundry/mcp/build-your-own-mcp-server?view=foundry)
-- [tool-mcp-custom-oauth.md](tool-mcp-custom-oauth.md) — the BYO OAuth2 connection + toolbox flow
+- [tool-mcp-custom-oauth.md](./tool-mcp-custom-oauth.md) — the BYO OAuth2 connection + toolbox flow

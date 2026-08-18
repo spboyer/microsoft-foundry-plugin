@@ -28,7 +28,7 @@ Continuous evaluation uses Foundry-native MCP tools to automatically assess agen
 
 ### Enable Continuous Evaluation
 
-Use the [continuous evaluation reference](continuous-eval.md) to configure monitoring. The workflow:
+Use the [continuous evaluation reference](./continuous-eval.md) to configure monitoring. The workflow:
 
 1. **Check existing config** — call `continuous_eval_get` to see if monitoring is already active.
 2. **Select evaluators** — recommend starting with the same evaluators used in batch evals for consistent comparison:
@@ -41,7 +41,7 @@ Use the [continuous evaluation reference](continuous-eval.md) to configure monit
 
 Monitoring is only complete when score drops trigger investigation and remediation.
 
-For instructions on how to read evaluation scores, triage regressions, and verify fixes, see [Acting on Results](continuous-eval.md#acting-on-results).
+For instructions on how to read evaluation scores, triage regressions, and verify fixes, see [Acting on Results](./continuous-eval.md#acting-on-results).
 
 The observe loop does not end at deployment. Continuous monitoring closes the loop: **observe → optimize → deploy → monitor → observe**. Always offer to set up monitoring after completing an optimization cycle.
 
@@ -49,4 +49,4 @@ The observe loop does not end at deployment. Continuous monitoring closes the lo
 
 - [Microsoft Foundry Cloud Evaluation](https://learn.microsoft.com/en-us/azure/ai-foundry/how-to/develop/cloud-evaluation)
 - [Hosted Agents](https://learn.microsoft.com/en-us/azure/ai-foundry/agents/concepts/hosted-agents)
-- [Continuous Evaluation Reference](continuous-eval.md)
+- [Continuous Evaluation Reference](./continuous-eval.md)

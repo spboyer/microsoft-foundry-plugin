@@ -127,7 +127,7 @@ Capture `AZURE_AI_PROJECT_ID`, `AZURE_AI_PROJECT_ENDPOINT`, and `AZURE_RESOURCE_
 >
 > Core `azd init` accepts `--subscription` and `-l/--location`; `azd ai agent init` does not. `azd ai agent init` then resolves the model from the chosen sample's manifest and writes it into `azure.yaml services.ai-project.deployments[]`; the next `azd provision` creates the deployment through Bicep. **You do not need to deploy a model separately for this path** — no `az cognitiveservices` calls, no `azd env set AI_PROJECT_DEPLOYMENTS`.
 >
-> Use [models/deploy-model](../../models/deploy-model/SKILL.md) **only** for out-of-band scenarios: adding models to a Foundry project that is not managed by this azd project, or ad-hoc deployments outside the azd lifecycle.
+> Use [models/deploy-model](../../models/deploy-model/deploy-model-skill.md) **only** for out-of-band scenarios: adding models to a Foundry project that is not managed by this azd project, or ad-hoc deployments outside the azd lifecycle.
 
 - Deploy an existing agent → [foundry-agent/deploy/deploy.md](../../foundry-agent/deploy/deploy.md)
 - Browse model catalog → `foundry_models_list` MCP tool

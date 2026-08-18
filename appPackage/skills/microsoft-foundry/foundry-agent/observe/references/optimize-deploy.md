@@ -29,4 +29,4 @@ After approval:
 
 ## Next Steps
 
-When the new version is running → proceed to [Step 8: Re-Evaluate](compare-iterate.md).
+When the new version is running → proceed to [Step 8: Re-Evaluate](./compare-iterate.md).

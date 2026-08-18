@@ -14,7 +14,7 @@ Scan for instructions, model selection, skill folders, function tool definitions
 
 Classify topology as single-agent, orchestrator/supervisor, specialist tool-agent, peer multi-agent, or unknown runtime. Do not collapse role-specific prompts into one global prompt. Ask before editing when multiple scopes are plausible.
 
-Use [Python Patterns](python-patterns.md#target-selection) to map evaluator/dataset goals to the smallest useful baseline.
+Use [Python Patterns](./python-patterns.md#target-selection) to map evaluator/dataset goals to the smallest useful baseline.
 
 ## Step 3: Scaffold Baseline Files
 
@@ -39,7 +39,7 @@ skill_dir: skills
 tool_file: tools.json
 ```
 
-Write the selected baseline prompt to `instructions.md`. Include only relevant skills under `skills/`. Use `tools.json` only for OpenAI function-calling tool definitions; see [Python Patterns](python-patterns.md#tools-file).
+Write the selected baseline prompt to `instructions.md`. Include only relevant skills under `skills/`. Use `tools.json` only for OpenAI function-calling tool definitions; see [Python Patterns](./python-patterns.md#tools-file).
 
 Choose a `model` value that already exists as a model deployment in the target Foundry project.
 
@@ -76,4 +76,4 @@ Run Python syntax checks, SDK import smoke test, baseline config smoke test with
 
 End with a review checkpoint. Summarize changed files, optimization targets, evaluator goals, global side effects, and verification. Do not deploy automatically.
 
-After user review, continue with [Optimize Workflow](optimize-workflow.md).
+After user review, continue with [Optimize Workflow](./optimize-workflow.md).
