@@ -8,13 +8,13 @@ Audience: other plugin authors hitting the same walls, and the wiqd team.
 
 **Status:** living document. Update it as new edges are found.
 
-Last updated: 2026-08-18 — plugin v1.0.6.
+Last updated: 2026-08-18 — plugin v1.0.6 (connector reaches Entra consent; awaiting admin approval).
 
 ---
 
 ## TL;DR for plugin authors
 
-If you are shipping a `remoteMcpServer` connector to Cowork, budget for these six
+If you are shipping a `remoteMcpServer` connector to Cowork, budget for these seven
 things. None of them are automated by any tool today.
 
 1. **You must ship a static `mcpToolDescription` file.** Dynamic `tools/list` discovery
@@ -26,6 +26,9 @@ things. None of them are automated by any tool today.
    static OAuth (`identityProvider: Custom`).
 6. **Use `applicableToApps: AnyApp`.** `SpecificApp` binds the OAuth config to the *Teams*
    app ID, but Cowork looks it up under the *M365* app ID, producing a hard 404.
+7. **Budget for an admin-consent conversation.** In a policy-restricted tenant, users
+   cannot consent to a custom API scope, and DCR is not available on Entra. Line this up
+   early — it is the one step you cannot unblock yourself.
 
 ---
 
@@ -363,7 +366,116 @@ connector. The Cowork UI itself just says "Could not verify connection."
 
 ---
 
-## Edge 6 — smaller things worth knowing
+## Edge 6 — tenant consent policy blocks the OAuth flow
+
+With Edges 1–5 fixed, the connector finally renders a **Connect** button and launches a
+real Entra authorization request. In a policy-restricted tenant it then stops at:
+
+> **Need admin approval**
+> Microsoft Foundry MCP for Cowork needs permission to access resources in your
+> organization that only an admin can grant.
+
+This is **not** a manifest, package, or wiqd problem. Nothing you can change in the plugin
+affects it.
+
+### Why it happens
+
+The requested scope is user-consentable *by design*:
+
+```bash
+az ad sp show --id fcdfa2de-b65b-4b54-9a1c-81c8a18282d9 \
+  --query "oauth2PermissionScopes[].{value:value,type:type}"
+# → { "value": "Foundry.Mcp.Tools", "type": "User" }
+```
+
+`type: User` means the resource owner allows ordinary users to consent. The block comes
+from the **tenant's** consent policy instead:
+
+```bash
+az rest --method GET --url "https://graph.microsoft.com/v1.0/policies/authorizationPolicy" \
+  --query defaultUserRolePermissions.permissionGrantPoliciesAssigned
+```
+
+```json
+[
+  "ManagePermissionGrantsForSelf.microsoft-user-default-low",
+  "ManagePermissionGrantsForSelf.msit-low-permission-from-unverified",
+  …
+]
+```
+
+Both self-consent policies are **low-impact only**. "Low impact" in practice means
+`User.Read`, `openid`, `profile`, and `offline_access` — a custom API scope such as
+`Foundry.Mcp.Tools` is not classified low, so user consent is refused and Entra falls
+through to the admin-approval page.
+
+### What does *not* work around it
+
+- **Dynamic Client Registration.** The resource advertises
+  `https://login.microsoftonline.com/common/v2.0` as its only authorization server, and
+  Entra's OpenID configuration exposes **no `registration_endpoint`** — Entra does not
+  implement RFC 7591. The manifest's `DynamicClientRegistration` auth type is therefore
+  unusable against any Entra-protected MCP server, despite the Cowork docs recommending it
+  as the alternative when API-key auth is unavailable.
+- **Publisher verification.** The `…-from-unverified` policy still caps consent at
+  low-impact permissions, so verifying the publisher does not unlock a custom API scope.
+- **Self-consent.** Requires a directory role; a normal developer account has none.
+
+### Why `az` works but the plugin does not
+
+`az account get-access-token --scope https://mcp.ai.azure.com/Foundry.Mcp.Tools` succeeds
+for the same user, which is misleading. Checking the tenant's grants for that resource:
+
+```bash
+SP=$(az ad sp show --id fcdfa2de-b65b-4b54-9a1c-81c8a18282d9 --query id -o tsv)
+az rest --method GET \
+  --url "https://graph.microsoft.com/v1.0/oauth2PermissionGrants?\$filter=resourceId eq '$SP'"
+# → []
+```
+
+There is **no consent grant at all**. The Azure CLI works because it is in the resource
+app's `preAuthorizedApplications` list — consent is waived for pre-authorized clients.
+A hand-rolled client registration gets no such treatment.
+
+This is the key insight for anyone reproducing this: *being able to call the MCP server
+from your terminal tells you nothing about whether your plugin's client can obtain a
+token.*
+
+### The fix
+
+An administrator (Cloud Application Administrator, Application Administrator, or Global
+Administrator) grants consent once for the plugin's client app:
+
+```bash
+az ad app permission admin-consent --id <your-client-app-id>
+```
+
+Or in the portal: **Entra ID → App registrations → *your app* → API permissions →
+Grant admin consent**.
+
+Equivalent direct URL:
+
+```
+https://login.microsoftonline.com/<tenantId>/adminconsent?client_id=<your-client-app-id>
+```
+
+If the tenant has the admin consent request workflow enabled, the "Need admin approval"
+page offers a **Request approval** button. If it only offers "Have an admin account? Sign
+in with that account", the workflow is disabled and you must route the request through
+your organization's normal process.
+
+### The better long-term fix
+
+The consent wall exists because every plugin author registers their own Entra client for a
+first-party Microsoft API. If the Foundry MCP team added the M365 Copilot / Cowork
+connector client to the resource app's `preAuthorizedApplications`, plugin authors would
+need no custom app registration and no admin consent at all — the same treatment the Azure
+CLI already receives. That is a product ask for the Foundry MCP team, not something a
+plugin author can solve.
+
+---
+
+## Edge 7 — smaller things worth knowing
 
 - **`targetAudience`.** Learn says: "When registering your OAuth client, set the usage by
   organization to **Any Microsoft 365 Organization** to ensure your plugin works across
@@ -486,8 +598,26 @@ Separately, the ATK `oauth/register` action requires `appId` even when
 `applicableToApps: AnyApp` makes it meaningless — that required-parameter check should be
 conditional.
 
-### P6 — surface real errors without `--verbose`
+### P5b — preflight the consent story
 
+Provisioning happily creates an OAuth registration that no user in the tenant can ever
+consent to. `wiqd plugin provision` (or a `wiqd plugin doctor`) could check, and warn:
+
+- Is the requested scope's `type` `User` or `Admin` on the resource service principal?
+- Does the tenant's `authorizationPolicy` restrict self-consent to low-impact permissions?
+- Does an `oauth2PermissionGrant` already exist for this client + resource pair?
+
+All three are single Graph calls, and together they predict the "Need admin approval" wall
+*before* the author ships and asks a colleague to test. Emitting the exact
+`az ad app permission admin-consent --id <clientId>` command as remediation would turn a
+multi-day mystery into a one-line ask.
+
+Worth documenting alongside it: **`DynamicClientRegistration` is unusable against any
+Entra-protected MCP server**, because Entra exposes no RFC 7591 `registration_endpoint`.
+The Cowork docs currently recommend DCR as the alternative when API-key auth is
+unavailable, which is a dead end for the entire Microsoft first-party surface.
+
+### P6 — surface real errors without `--verbose`
 Deep validation should print the underlying ATK error text by default. The truncated
 `TDP-F… AppStudioPlugin.ManifestValidationFailed` row is not actionable; the message
 behind it (`InvalidAgentConnector: … not found in the app package`) is immediately
@@ -505,10 +635,15 @@ If P1 is not adopted, wiqd should at least offer a documented, cross-platform
 
 - Does the Enterprise Token Store support a **secretless PKCE public client** for static
   OAuth, or does it require a confidential client with a secret? Learn is ambiguous and
-  tenant policy here forbids secrets.
-- Does the Foundry MCP server advertise a `registration_endpoint` (RFC 7591)? If so,
-  `DynamicClientRegistration` would sidestep the client-secret question entirely. Entra
-  generally does not support DCR, so this is likely a dead end.
+  tenant policy here forbids secrets. The flow now reaches Entra's consent page, which is
+  circumstantial evidence that the authorization-code leg is well-formed — but the
+  code→token exchange is still unproven pending consent.
+- Will the Foundry MCP team pre-authorize the Cowork connector client, removing the need
+  for per-author app registrations entirely?
+- ~~Does the Foundry MCP server advertise a `registration_endpoint` (RFC 7591)?~~
+  **Answered: no.** Its only authorization server is
+  `https://login.microsoftonline.com/common/v2.0`, and Entra's OpenID configuration
+  exposes no `registration_endpoint`. `DynamicClientRegistration` is not usable here.
 - Is `mcpToolDescription` genuinely what Cowork's connector health check consumes, or is it
   only one of several preconditions? The v1.0.5 refresh failed on the `applicableToApps`
   404 (Edge 5) before it could get far enough to tell us, so this is still unconfirmed.
@@ -532,6 +667,8 @@ For anyone reproducing this setup:
 - [ ] `wiqd plugin validate --mode deep --verbose` → 0 errors
 - [ ] Deployed vault record shows `identityProvider: Custom`, a non-null `scopes`, `isPKCEEnabled: true`, and `applicableToApps: AnyApp`
 - [ ] Clicking refresh on the connector produces no 404 in the browser network tab
+- [ ] The connector shows a **Connect** button and launches an Entra sign-in
+- [ ] Admin consent granted for the client app on the resource's delegated scope
 - [ ] Cowork → Sources & Skills → Plugins → connector verifies without error
 
 ---
@@ -561,4 +698,4 @@ things forward, in order of usefulness:
 | 1.0.3 | Rewrote skill instructions for Cowork (use bundled connector, not local Azure MCP) | Skill loaded; connector still failed |
 | 1.0.4 | Migrated to static OAuth + PKCE (`identityProvider: Custom`) | Vault record correct; connector still failed |
 | 1.0.5 | Added `mcpToolDescription` + ZIP injection step | Deep validation clean; refresh returned a 404 naming the M365 app ID |
-| 1.0.6 | `applicableToApps: AnyApp`, old vault record deleted and recreated | Record verified as `AnyApp`; **pending Cowork retry** |
+| 1.0.6 | `applicableToApps: AnyApp`, old vault record deleted and recreated | **Connect button appears and the real OAuth flow launches.** Blocked at Entra "Need admin approval" — tenant consent policy, not a packaging issue |
