@@ -598,6 +598,30 @@ Separately, the ATK `oauth/register` action requires `appId` even when
 `applicableToApps: AnyApp` makes it meaningless — that required-parameter check should be
 conditional.
 
+### P5c — ask for `microsoftEntra` auth on agent connectors
+
+The connector `authorization.type` enum is closed:
+
+```
+None | OAuthPluginVault | ApiKeyPluginVault | DynamicClientRegistration | AzureKeyVault
+```
+
+For an Entra-protected MCP server, four of those five are unusable: `None` fails the
+handshake, `ApiKeyPluginVault` and `AzureKeyVault` need a static secret the service does
+not issue, and `DynamicClientRegistration` requires an RFC 7591 `registration_endpoint`
+that Entra does not expose. Only `OAuthPluginVault` remains, and it demands a `clientId`
+the author must own — hence the app registration and the consent wall.
+
+Meanwhile `composeExtensions` in the *same* manifest schema accepts
+`authType: "microsoftEntra"`, i.e. first-party SSO with no author-owned app registration
+at all. A message extension can therefore call an Entra-protected service natively while
+an MCP connector to the identical service cannot.
+
+This reads as an omission rather than a deliberate restriction. Extending the connector
+enum to include `microsoftEntra` would delete this document's Edges 3 and 6 outright for
+every Microsoft-hosted MCP server. Worth raising with the manifest owners; wiqd is well
+placed to carry the request since it sees the aggregate pain across authors.
+
 ### P5b — preflight the consent story
 
 Provisioning happily creates an OAuth registration that no user in the tenant can ever
