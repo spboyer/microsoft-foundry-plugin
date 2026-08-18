@@ -28,6 +28,8 @@ official remote Microsoft Foundry MCP connector at `https://mcp.ai.azure.com`.
 - `scripts/inject-tool-description.sh` - adds the tool description to the built
   `.zip`. The Agents Toolkit packager does not copy `mcpToolDescription.file`,
   so this runs as a lifecycle `script` step after packaging.
+- `scripts/show-oauth-config.mjs` - reads (or deletes) the deployed OAuth vault
+  record backing the connector, since no supported CLI exposes it.
 - `docs/cowork-mcp-connector-findings.md` - the sharp edges found while wiring
   an authenticated MCP connector into Cowork, plus proposed wiqd improvements.
 
@@ -39,7 +41,9 @@ Its single-tenant public client requests the delegated
 `https://mcp.ai.azure.com/Foundry.Mcp.Tools` scope and uses the Microsoft Teams
 OAuth redirect URI. Provisioning creates the Enterprise token-store
 configuration referenced by the manifest; no client secret or callback server
-is required.
+is required. The registration uses `applicableToApps: AnyApp` because Cowork
+resolves the connector's `referenceId` under the M365 app ID rather than the
+Teams app ID.
 
 ## Update from upstream
 

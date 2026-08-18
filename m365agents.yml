@@ -20,6 +20,7 @@ provision:
   - uses: oauth/register
     with:
       name: microsoft-foundry-mcp
+      # Required by the action even though applicableToApps is AnyApp.
       appId: ${{TEAMS_APP_ID}}
       flow: authorizationCode
       identityProvider: Custom
@@ -31,7 +32,7 @@ provision:
       scope: https://mcp.ai.azure.com/Foundry.Mcp.Tools,offline_access
       isPKCEEnabled: true
       tokenExchangeMethodType: PostRequestBody
-      applicableToApps: SpecificApp
+      applicableToApps: AnyApp
       targetAudience: HomeTenant
     writeToEnvironmentFile:
       configurationId: FOUNDRY_MCP_AUTH_ID

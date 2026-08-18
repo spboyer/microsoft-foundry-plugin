@@ -8,13 +8,13 @@ Audience: other plugin authors hitting the same walls, and the wiqd team.
 
 **Status:** living document. Update it as new edges are found.
 
-Last updated: 2026-08-18 — plugin v1.0.5.
+Last updated: 2026-08-18 — plugin v1.0.6.
 
 ---
 
 ## TL;DR for plugin authors
 
-If you are shipping a `remoteMcpServer` connector to Cowork, budget for these five
+If you are shipping a `remoteMcpServer` connector to Cowork, budget for these six
 things. None of them are automated by any tool today.
 
 1. **You must ship a static `mcpToolDescription` file.** Dynamic `tools/list` discovery
@@ -24,6 +24,8 @@ things. None of them are automated by any tool today.
 4. **You must hand-author OAuth.** `wiqd plugin add connector` has no auth flags at all.
 5. **Entra SSO is the wrong OAuth mode** for an external protected resource. You need
    static OAuth (`identityProvider: Custom`).
+6. **Use `applicableToApps: AnyApp`.** `SpecificApp` binds the OAuth config to the *Teams*
+   app ID, but Cowork looks it up under the *M365* app ID, producing a hard 404.
 
 ---
 
@@ -263,7 +265,15 @@ question here.
 
 ### Reading back what actually got deployed
 
-There is no CLI for this, which makes the whole loop hard to debug. What works:
+There is no supported CLI for this, which makes the whole loop hard to debug. This repo
+ships `scripts/show-oauth-config.mjs`, which reads (and can delete) the live record:
+
+```bash
+node scripts/show-oauth-config.mjs --env local
+node scripts/show-oauth-config.mjs --env local --delete
+```
+
+Under the hood:
 
 ```
 GET    https://teams.microsoft.com/api/platform/v1.0/oAuthConfigurations/<referenceId>
@@ -271,17 +281,89 @@ DELETE https://teams.microsoft.com/api/platform/v1.0/oAuthConfigurations/<refere
 Header: Client-Source: agentstoolkit
 ```
 
-Authenticate with the ATK token cache (`~/.fx/account/token.cache.appStudio.json`,
-AES-256-GCM, key in the macOS keychain under `Microsoft 365 Agents Toolkit` / `appStudio`),
+Authenticate with the ATK token cache at `~/.fx/account/token.cache.appStudio.json`,
 client `7ea7c24c-b1f6-4a20-9d11-9ae12e9e7ac0`, scope
 `https://teamsgraph.teams.microsoft.com/.default`.
+
+The cache is AES-256-GCM encrypted. Its shape (from `AccountCrypto` in the ATK CLI bundle):
+
+- JSON with three **hex** fields — `i` (IV), `c` (ciphertext), `t` (auth tag).
+- The key comes from the OS keychain under service `Microsoft 365 Agents Toolkit`,
+  account `appStudio`, and is a **raw 32-character string** used verbatim — *not*
+  hex- or base64-decoded first. Decoding it yields `ERR_CRYPTO_INVALID_KEYLEN`.
 
 **Quirk:** `DELETE` returns `204`, but an immediate `GET` still returns `200`. Propagation
 lag — re-check after a few seconds for the `404`.
 
 ---
 
-## Edge 5 — smaller things worth knowing
+## Edge 5 — `applicableToApps: SpecificApp` binds to the wrong app ID
+
+This one produced a clean, unambiguous failure — and is the reason the connector still
+would not verify even after Edges 1–4 were fixed.
+
+A Cowork plugin ends up with **two** different app identities:
+
+| Env var | Value (this plugin) | Written by |
+| --- | --- | --- |
+| `TEAMS_APP_ID` | `93c43219-a28c-4809-a63b-308b5c97cc6a` | `teamsApp/create` |
+| `M365_APP_ID` | `bd6f81c3-239c-449b-84c5-5bc568a33564` | `copilotAgent/publish` |
+
+ATK's stock `oauth/register` block registers the config against `${{TEAMS_APP_ID}}` with
+`applicableToApps: SpecificApp`. **Cowork resolves the connector's `referenceId` under the
+M365 app ID.** The two never match, so the refresh call in the Cowork UI returns:
+
+```json
+{
+  "error": {
+    "code": "NotFound",
+    "message": "Configuration 'NzJmOTg4YmYt…' not found in Application 'bd6f81c3-239c-449b-84c5-5bc568a33564'",
+    "innerError": { "code": "M365AppNotFoundError", "target": "Custom" }
+  }
+}
+```
+
+Note the referenceId is base64 of `<tenantId>##<configId>`, which is handy for confirming
+you are looking at the right record:
+
+```bash
+echo '<referenceId>' | base64 -d
+# 72f988bf-…-2d7cd011db47##6b094e7b-…-c136504808fe
+```
+
+### The fix
+
+Set `applicableToApps: AnyApp` — which the ATK schema documents as the **default** anyway:
+
+> Which app can access the OAuth registration? Values can be `"SpecificApp"` or `"AnyApp"`.
+> Default is `"AnyApp"`.
+
+Two traps while applying it:
+
+- **`appId` is still required by the action** even though the schema says it "only takes
+  effect when applicableToApps is SpecificApp". Removing it fails provisioning with
+  `the following parameter(s): appId, are either missing or have an invalid value`.
+  Leave `appId: ${{TEAMS_APP_ID}}` in place; with `AnyApp` it simply has no binding effect.
+- **Changing the YAML is not enough.** `oauth/register` will not rewrite an existing
+  record. Delete the old vault config, clear `FOUNDRY_MCP_AUTH_ID` from `env/.env.<env>`,
+  then re-provision so a fresh record is created:
+
+  ```bash
+  node scripts/show-oauth-config.mjs --env local --delete
+  sed -i '' '/^FOUNDRY_MCP_AUTH_ID=/d' env/.env.local
+  wiqd plugin provision --env local
+  ```
+
+Verify afterwards that the live record reads `applicableToApps: AnyApp` — see
+`scripts/show-oauth-config.mjs`.
+
+**Why this is so hard to find:** nothing in validation, provisioning, or packaging flags
+it. The only signal is a 404 in the browser's network tab when you click refresh on the
+connector. The Cowork UI itself just says "Could not verify connection."
+
+---
+
+## Edge 6 — smaller things worth knowing
 
 - **`targetAudience`.** Learn says: "When registering your OAuth client, set the usage by
   organization to **Any Microsoft 365 Organization** to ensure your plugin works across
@@ -371,16 +453,38 @@ link the Learn authentication page from `wiqd plugin add connector --help`.
 ### P5 — inspect and diff deployed OAuth vault records
 
 ```
-wiqd plugin auth show [--env local]
+wiqd plugin auth show [--env local] [--diff]
 ```
 
 …printing the deployed `oAuthConfigurations` record for the connector's `referenceId`.
-Diagnosing Edge 4 required reverse-engineering the ATK token cache and hand-rolling an
-MSAL client just to read back what had been deployed. Authors cannot currently answer the
-basic question *"what OAuth config is actually live right now?"* with any supported tool.
+Diagnosing Edges 4 and 5 required reverse-engineering the ATK token cache and hand-rolling
+an MSAL client just to read back what had been deployed. Authors cannot currently answer
+the basic question *"what OAuth config is actually live right now?"* with any supported
+tool. This repo's `scripts/show-oauth-config.mjs` is that command.
 
-A `--diff` mode against the local `oauth/register` block would immediately surface the
-`scopes: null` symptom that made the Entra-SSO misconfiguration so hard to spot.
+A `--diff` mode against the local `oauth/register` block would immediately surface both
+the `scopes: null` symptom (Edge 4) and the `applicableToApps: SpecificApp` mismatch
+(Edge 5).
+
+Related: `wiqd plugin provision` should detect that the `oauth/register` block has changed
+since the record was created and either update the record or tell the author to delete and
+recreate it. Today it silently keeps the stale record, so a YAML fix appears to deploy
+successfully while changing nothing.
+
+### P5a — default the OAuth registration to `AnyApp`
+
+wiqd's scaffolding should not emit `applicableToApps: SpecificApp` bound to
+`${{TEAMS_APP_ID}}` for a Cowork plugin, because Cowork resolves the config under
+`M365_APP_ID`. Either default to `AnyApp` (the ATK schema's own documented default), or
+bind to `${{M365_APP_ID}}`.
+
+`wiqd plugin validate` could also flag the combination
+`applicableToApps: SpecificApp` + `appId: ${{TEAMS_APP_ID}}` + a Cowork connector as a
+known-broken configuration.
+
+Separately, the ATK `oauth/register` action requires `appId` even when
+`applicableToApps: AnyApp` makes it meaningless — that required-parameter check should be
+conditional.
 
 ### P6 — surface real errors without `--verbose`
 
@@ -406,7 +510,12 @@ If P1 is not adopted, wiqd should at least offer a documented, cross-platform
   `DynamicClientRegistration` would sidestep the client-secret question entirely. Entra
   generally does not support DCR, so this is likely a dead end.
 - Is `mcpToolDescription` genuinely what Cowork's connector health check consumes, or is it
-  only one of several preconditions? To be confirmed once v1.0.5 is retried in the UI.
+  only one of several preconditions? The v1.0.5 refresh failed on the `applicableToApps`
+  404 (Edge 5) before it could get far enough to tell us, so this is still unconfirmed.
+- Would binding the OAuth record to `${{M365_APP_ID}}` with `SpecificApp` also work? It is
+  the tighter configuration, but `oauth/register` runs before `copilotAgent/publish` in
+  the lifecycle, so `M365_APP_ID` is empty on a first provision — a chicken-and-egg problem
+  that `AnyApp` sidesteps.
 
 ---
 
@@ -421,8 +530,26 @@ For anyone reproducing this setup:
 - [ ] `mcpToolDescription.file` has **no** `./` prefix
 - [ ] `unzip -l` on the built package shows the tools file
 - [ ] `wiqd plugin validate --mode deep --verbose` → 0 errors
-- [ ] Deployed vault record shows `identityProvider: Custom`, a non-null `scopes`, and `isPKCEEnabled: true`
+- [ ] Deployed vault record shows `identityProvider: Custom`, a non-null `scopes`, `isPKCEEnabled: true`, and `applicableToApps: AnyApp`
+- [ ] Clicking refresh on the connector produces no 404 in the browser network tab
 - [ ] Cowork → Sources & Skills → Plugins → connector verifies without error
+
+---
+
+## Debugging technique that actually worked
+
+Every layer above validated clean while the connector was broken. What finally moved
+things forward, in order of usefulness:
+
+1. **The browser network tab.** The Cowork UI's "Could not verify connection" carries no
+   information. The underlying XHR carried an exact, actionable error
+   (`M365AppNotFoundError` naming both the config and the application). Always open
+   DevTools before guessing.
+2. **Reading the deployed OAuth record**, rather than trusting the YAML you wrote.
+   Edges 4 and 5 were both invisible in source and obvious in the deployed record.
+3. **Proving the MCP server healthy out-of-band** with a real delegated token, so the
+   server could be eliminated as a variable early.
+4. **`--verbose` on deep validation**, which turns a truncated error code into a sentence.
 
 ---
 
@@ -433,4 +560,5 @@ For anyone reproducing this setup:
 | 1.0.2 | Added Entra SSO auth (`identityProvider: MicrosoftEntra`) | Connector failed to verify; vault record had `scopes: null` |
 | 1.0.3 | Rewrote skill instructions for Cowork (use bundled connector, not local Azure MCP) | Skill loaded; connector still failed |
 | 1.0.4 | Migrated to static OAuth + PKCE (`identityProvider: Custom`) | Vault record correct; connector still failed |
-| 1.0.5 | Added `mcpToolDescription` + ZIP injection step | Deep validation clean; **pending Cowork retry** |
+| 1.0.5 | Added `mcpToolDescription` + ZIP injection step | Deep validation clean; refresh returned a 404 naming the M365 app ID |
+| 1.0.6 | `applicableToApps: AnyApp`, old vault record deleted and recreated | Record verified as `AnyApp`; **pending Cowork retry** |
