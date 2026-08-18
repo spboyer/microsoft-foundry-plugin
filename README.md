@@ -30,8 +30,12 @@ official remote Microsoft Foundry MCP connector at `https://mcp.ai.azure.com`.
   so this runs as a lifecycle `script` step after packaging.
 - `scripts/show-oauth-config.mjs` - reads (or deletes) the deployed OAuth vault
   record backing the connector, since no supported CLI exposes it.
+- `scripts/recreate-entra-app.sh` - recreates the Entra app registration if it is
+  ever deleted. Guarded, so it no-ops while the app still exists.
 - `docs/cowork-mcp-connector-findings.md` - the sharp edges found while wiring
   an authenticated MCP connector into Cowork, plus proposed wiqd improvements.
+- `docs/foundry/` - durable record of the deployed identifiers and Entra app
+  config, which otherwise live only in gitignored `env/.env.local` and in Entra.
 
 The initial import is pinned in [NOTICE.md](NOTICE.md). Upstream content remains
 licensed under the MIT License included in [LICENSE](LICENSE).

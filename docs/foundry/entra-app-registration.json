@@ -1,0 +1,49 @@
+{
+  "displayName": "Microsoft Foundry MCP for Cowork",
+  "appId": "eccfe193-2196-4444-9782-075a6c1c40fd",
+  "id": "c9e35709-da01-46b9-9197-a85103cbd2fe",
+  "createdDateTime": "2026-08-18T19:50:06Z",
+  "signInAudience": "AzureADMyOrg",
+  "publisherDomain": "microsoft.onmicrosoft.com",
+  "identifierUris": [],
+  "isFallbackPublicClient": null,
+  "spa": {
+    "redirectUris": [
+      "https://teams.microsoft.com/api/platform/v1.0/oAuthRedirect"
+    ]
+  },
+  "web": {
+    "homePageUrl": null,
+    "implicitGrantSettings": {
+      "enableAccessTokenIssuance": false,
+      "enableIdTokenIssuance": false
+    },
+    "logoutUrl": null,
+    "redirectUriSettings": [],
+    "redirectUris": []
+  },
+  "publicClient": {
+    "redirectUris": []
+  },
+  "requiredResourceAccess": [
+    {
+      "resourceAccess": [
+        {
+          "id": "5113a404-4d87-43b6-8d8c-819a39bef5ec",
+          "type": "Scope"
+        }
+      ],
+      "resourceAppId": "fcdfa2de-b65b-4b54-9a1c-81c8a18282d9"
+    }
+  ],
+  "api": {
+    "acceptMappedClaims": null,
+    "knownClientApplications": [],
+    "oauth2PermissionScopes": [],
+    "preAuthorizedApplications": [],
+    "requestedAccessTokenVersion": 2
+  },
+  "tags": [],
+  "_note": "Snapshot of the Entra app registration backing the Cowork MCP connector. Contains identifiers only; no credentials (the app is a secretless PKCE public client).",
+  "_capturedAt": "2026-08-18"
+}

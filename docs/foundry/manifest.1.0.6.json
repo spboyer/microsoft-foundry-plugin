@@ -1,0 +1,53 @@
+{
+    "$schema": "https://developer.microsoft.com/en-us/json-schemas/teams/v1.29/MicrosoftTeams.schema.json",
+    "manifestVersion": "1.29",
+    "version": "1.0.6",
+    "id": "93c43219-a28c-4809-a63b-308b5c97cc6a",
+    "developer": {
+        "name": "Microsoft Foundry",
+        "websiteUrl": "https://ai.azure.com",
+        "privacyUrl": "https://privacy.microsoft.com/privacystatement",
+        "termsOfUseUrl": "https://www.microsoft.com/servicesagreement"
+    },
+    "icons": {
+        "color": "color.png",
+        "outline": "outline.png"
+    },
+    "name": {
+        "short": "Microsoft Foundry",
+        "full": "Microsoft Foundry"
+    },
+    "description": {
+        "short": "Microsoft Foundry skills with the remote Foundry MCP connector.",
+        "full": "Focused Microsoft Foundry guidance and workflows from microsoft/azure-skills, paired with the official remote Microsoft Foundry MCP server."
+    },
+    "accentColor": "#FFFFFF",
+    "validDomains": [
+        "ai.azure.com",
+        "mcp.ai.azure.com"
+    ],
+    "agentSkills": [
+        {
+            "folder": "skills/microsoft-foundry"
+        }
+    ],
+    "agentConnectors": [
+        {
+            "id": "microsoft-foundry-mcp",
+            "displayName": "Microsoft Foundry MCP",
+            "description": "Remote Microsoft Foundry tools for models, deployments, agents, evaluations, and project operations.",
+            "toolSource": {
+                "remoteMcpServer": {
+                    "mcpServerUrl": "https://mcp.ai.azure.com",
+                    "mcpToolDescription": {
+                        "file": "tools/foundry-mcp-tools.json"
+                    },
+                    "authorization": {
+                        "type": "OAuthPluginVault",
+                        "referenceId": "NzJmOTg4YmYtODZmMS00MWFmLTkxYWItMmQ3Y2QwMTFkYjQ3IyMwZjNlMTJhNS03YzEzLTQ4YzItYmM5OS1mNTI3NDZiMDNhYjY="
+                    }
+                }
+            }
+        }
+    ]
+}
