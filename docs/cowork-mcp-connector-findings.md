@@ -137,6 +137,29 @@ from the live server so it can never drift by hand.
 
 ---
 
+### A static description drifts from the server
+
+Worth planning for: the file is a snapshot, and the server moves. This package pins 79
+tools, captured 2026-08-18. The GitHub MCP host enumerated 78 from the same server days
+later, so the surface had already changed.
+
+Nothing warns about this. The manifest has no version or checksum tying the description to
+a server state, and neither the toolchain nor Cowork re-validates it after publish. A
+connector can therefore advertise tools that no longer exist, or hide tools that do —
+silently, and for as long as the plugin ships without a rebuild.
+
+Two consequences for authors:
+
+- Regenerating the description belongs in the release process, not in one-off setup. That
+  is why `scripts/fetch-mcp-tools.mjs` exists rather than the file being hand-edited.
+- The drift is invisible in testing, because a stale description still validates and still
+  packages cleanly. Only a tool call against a removed tool would surface it.
+
+This is a further argument for P3: a tool that regenerates and diffs the description would
+turn silent drift into a visible, reviewable change.
+
+---
+
 ## Edge 2 — a leading `./` in `mcpToolDescription.file` fails validation
 
 Microsoft's Cowork doc shows this, twice:
@@ -515,10 +538,22 @@ before handing them to non-MSAL credentials:
 scope requested by a client that is not pre-authorized produces a consent prompt. Same
 server, same user, same permission — the outcome turns entirely on which client is asking.
 
+The GitHub/VS Code MCP host behaves the same way. Adding `https://mcp.ai.azure.com`
+directly there prompts for nothing and enumerates the full tool set — the host brokers the
+token with its own first-party Microsoft client, and the author supplies nothing but a URL.
+
+That makes three Microsoft hosts — Azure CLI, Azure MCP, and the GitHub MCP host — that
+reach this server with **no author-owned Entra application**. A Cowork connector is the
+only one that requires one.
+
 A Cowork connector has no ambient identity to borrow. The token exchange happens
 server-side in the Enterprise Token Store, against a client the author must own and that
 nobody has pre-authorized. So the comparison is not "Azure MCP solved this and we did
 not"; it is "Azure MCP was never in this position."
+
+The pattern across all three is the same: **the host owns the client identity and the
+author declares only a URL and a scope.** That is the design P5c asks for, and at this
+point it is the majority behaviour rather than a novel proposal.
 
 ### The fix
 
@@ -775,13 +810,10 @@ If P1 is not adopted, wiqd should at least offer a documented, cross-platform
 
 ## Open questions
 
-- **Does the GitHub/VS Code MCP host reach this server without an author-owned app?**
-  Adding `https://mcp.ai.azure.com` directly as an MCP server there reportedly produced no
-  auth prompt at all. Two readings, and they mean opposite things: either the host brokered
-  a token with its own first-party Microsoft client (another point for P5c), or the server
-  was added but never actually connected, with the 401 surfacing only on first tool call.
-  Distinguishing test: does it enumerate roughly 79 `foundry_*` tools, or zero? Unverified
-  at time of writing.
+- ~~Does the GitHub/VS Code MCP host reach this server without an author-owned app?~~
+  **Resolved: yes.** Adding `https://mcp.ai.azure.com` there prompted for nothing and
+  enumerated 78 tools across models, agents, evaluation, sessions and connections. The host
+  brokered the token with its own first-party Microsoft client. See Edge 6.
 
 - Does the Enterprise Token Store support a **secretless PKCE public client** for static
   OAuth, or does it require a confidential client with a secret? Learn is ambiguous and
