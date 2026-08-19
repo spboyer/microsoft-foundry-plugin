@@ -474,6 +474,52 @@ This is the key insight for anyone reproducing this: *being able to call the MCP
 from your terminal tells you nothing about whether your plugin's client can obtain a
 token.*
 
+### The same applies to Azure MCP, which reaches this server with no consent at all
+
+Worth chasing down, because "Azure MCP talks to Foundry and nobody consents to anything"
+looks like proof that this whole problem is self-inflicted. It is not, and the reason is
+instructive.
+
+Azure MCP genuinely does proxy to the same server. From
+`servers/Azure.Mcp.Server/src/Resources/registry.json` in `microsoft/mcp`:
+
+```json
+"foundry": {
+  "url": "https://mcp.ai.azure.com",
+  "title": "Microsoft Foundry MCP",
+  "toolPrefix": "foundry_",
+  "oauthScopes": ["https://mcp.ai.azure.com/Foundry.Mcp.Tools"]
+}
+```
+
+Same URL, same scope, no consent prompt. Two things account for the difference, and
+neither is available to a Cowork connector:
+
+**It runs locally and borrows an ambient identity.**
+`core/Microsoft.Mcp.Core/src/Services/Azure/Authentication/CustomChainedCredential.cs`
+assembles a chain of Environment → WorkloadIdentity → ManagedIdentity → VisualStudio →
+VS Code → **AzureCli** → AzurePowerShell → azd → InteractiveBrowser/DeviceCode. On a
+developer machine it lands on `AzureCliCredential` and reuses the existing `az login`
+token cache. The authorization flow did happen — at `az login`, possibly weeks earlier.
+Azure MCP registers no Entra application of its own; `AZURE_MCP_CLIENT_ID` exists only as
+an override.
+
+**It requests `/.default` rather than the named scope.** The same file normalizes scopes
+before handing them to non-MSAL credentials:
+
+> `https://mcp.ai.azure.com/Foundry.Mcp.Tools` → `https://mcp.ai.azure.com/.default`
+> "required for non-MSAL credentials (Azure CLI, Managed Identity, etc.) which derive the
+> resource URL from the scope by stripping the `/.default` suffix"
+
+`/.default` requested by a **pre-authorized** client returns a token silently. The identical
+scope requested by a client that is not pre-authorized produces a consent prompt. Same
+server, same user, same permission — the outcome turns entirely on which client is asking.
+
+A Cowork connector has no ambient identity to borrow. The token exchange happens
+server-side in the Enterprise Token Store, against a client the author must own and that
+nobody has pre-authorized. So the comparison is not "Azure MCP solved this and we did
+not"; it is "Azure MCP was never in this position."
+
 ### The fix
 
 An administrator (Cloud Application Administrator, Application Administrator, or Global
@@ -689,6 +735,30 @@ enum to include `microsoftEntra` would delete this document's Edges 3 and 6 outr
 every Microsoft-hosted MCP server. Worth raising with the manifest owners; wiqd is well
 placed to carry the request since it sees the aggregate pain across authors.
 
+**There is already a working precedent inside Microsoft.** Azure MCP consumes this exact
+server through a declarative registry entry —
+`servers/Azure.Mcp.Server/src/Resources/registry.json` in `microsoft/mcp` — carrying only
+a URL, a tool prefix, and the OAuth scopes:
+
+```json
+"foundry": {
+  "url": "https://mcp.ai.azure.com",
+  "toolPrefix": "foundry_",
+  "oauthScopes": ["https://mcp.ai.azure.com/Foundry.Mcp.Tools"]
+}
+```
+
+The host acquires the token and proxies the call; `RegistryToolLoader` forwards
+`tools/call` verbatim with no local implementation. Notably the resource's **app ID never
+appears in the codebase at all** — only the scope URI, which Entra resolves at
+token-issuance time. That is precisely the shape a `microsoftEntra` connector auth type
+would take: declare the scope, let the host broker the token, and require nothing of the
+author beyond naming what they need.
+
+So the ask is not speculative design work. A shipping Microsoft MCP product already
+implements host-brokered auth against this very server, and demonstrates that a
+scope-only declaration is sufficient.
+
 ### P6 — surface real errors without `--verbose`
 Deep validation should print the underlying ATK error text by default. The truncated
 `TDP-F… AppStudioPlugin.ManifestValidationFailed` row is not actionable; the message
@@ -704,6 +774,14 @@ If P1 is not adopted, wiqd should at least offer a documented, cross-platform
 ---
 
 ## Open questions
+
+- **Does the GitHub/VS Code MCP host reach this server without an author-owned app?**
+  Adding `https://mcp.ai.azure.com` directly as an MCP server there reportedly produced no
+  auth prompt at all. Two readings, and they mean opposite things: either the host brokered
+  a token with its own first-party Microsoft client (another point for P5c), or the server
+  was added but never actually connected, with the 401 surfacing only on first tool call.
+  Distinguishing test: does it enumerate roughly 79 `foundry_*` tools, or zero? Unverified
+  at time of writing.
 
 - Does the Enterprise Token Store support a **secretless PKCE public client** for static
   OAuth, or does it require a confidential client with a secret? Learn is ambiguous and
