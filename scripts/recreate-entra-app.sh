@@ -5,6 +5,16 @@
 # you will end up with a duplicate registration and a second consent problem.
 # Check first:  az ad app show --id "$EXPECTED_APP_ID"
 #
+# The app was deleted on 2026-08-19. Within 30 days of that date, PREFER RESTORING it,
+# because a restore returns the same appId and leaves env/.env.local, the OAuth vault
+# record and the shipped manifest all valid:
+#
+#   az rest --method POST \
+#     --url "https://graph.microsoft.com/v1.0/directory/deletedItems/c9e35709-da01-46b9-9197-a85103cbd2fe/restore"
+#
+# This script mints a NEW appId, which additionally requires updating env/.env.local,
+# clearing FOUNDRY_MCP_AUTH_ID and re-provisioning. See docs/foundry/deployed-state.md.
+#
 # The app is deliberately a secretless PKCE public client:
 #   - registered as an SPA platform, which forces PKCE and forbids a secret
 #   - tenant policy blocks client secrets anyway, so this is not a preference

@@ -19,7 +19,7 @@ Captured 2026-08-18 against plugin version 1.0.6.
 | `M365_APP_ID` | `bd6f81c3-239c-449b-84c5-5bc568a33564` | Created by `copilotAgent/publish`. **This** is the ID Cowork resolves the connector's OAuth record under. |
 | `M365_TITLE_ID` | `T_160c738d-0556-4974-5a83-9fc11aedd159` | Catalog title. Stays stable across version bumps — reuse it, don't mint a new one. |
 | `TEAMS_APP_TENANT_ID` | `72f988bf-86f1-41af-91ab-2d7cd011db47` | microsoft.com corp tenant. |
-| `FOUNDRY_MCP_CLIENT_ID` | `eccfe193-2196-4444-9782-075a6c1c40fd` | Our hand-registered Entra client. See `entra-app-registration.json`. |
+| `FOUNDRY_MCP_CLIENT_ID` | `eccfe193-2196-4444-9782-075a6c1c40fd` | Our hand-registered Entra client. **Deleted 2026-08-19** — see below. Snapshot in `entra-app-registration.json`. |
 | `FOUNDRY_MCP_AUTH_ID` | see `env/.env.local` | Vault record referenceId, regenerated on each `oauth/register`. Deliberately not pinned here — it changes. |
 
 The two app IDs are the trap. They look interchangeable and are not: binding the OAuth
@@ -54,6 +54,34 @@ is why nobody on our side can add ourselves to its `preAuthorizedApplications`.
 
 Recreating the Entra app itself is only necessary if it has been deleted; see
 `entra-app-registration.md`.
+
+## The Entra app was deleted on 2026-08-19
+
+Pending a decision on whether an author-owned client is the right approach at all — see
+the Azure DevOps comparison in `../cowork-mcp-connector-findings.md` — the registration was
+deleted rather than left sitting unused and unconsented.
+
+**Restore it (preferred, within 30 days of 2026-08-19):**
+
+```bash
+az rest --method POST \
+  --url "https://graph.microsoft.com/v1.0/directory/deletedItems/c9e35709-da01-46b9-9197-a85103cbd2fe/restore"
+```
+
+Restoring returns the **same `appId`**, so `env/.env.local`, the OAuth vault record and the
+shipped manifest all keep working untouched. Check it is still restorable with:
+
+```bash
+az rest --method GET --url "https://graph.microsoft.com/v1.0/directory/deletedItems/microsoft.graph.application?\$filter=appId eq 'eccfe193-2196-4444-9782-075a6c1c40fd'"
+```
+
+**After 30 days** the object is purged and only `scripts/recreate-entra-app.sh` remains.
+That mints a **new** `appId`, which then has to be written into `env/.env.local`, followed by
+clearing `FOUNDRY_MCP_AUTH_ID` and re-provisioning so `oauth/register` mints a matching vault
+record. Restoring is strictly less work — prefer it while the window is open.
+
+Note the deployed plugin's connector is broken until one or the other happens: the vault
+record still names a client that no longer exists. Nothing else about the package changed.
 
 ## What is *not* captured here
 
