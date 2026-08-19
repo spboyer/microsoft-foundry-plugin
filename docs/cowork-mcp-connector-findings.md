@@ -590,6 +590,76 @@ This reframes the ask. P5c is not a request to design and build something new. I
 request to expose to plugin authors a capability the product already ships and already
 demonstrates on its own plugin page.
 
+### The closest comparison: Azure DevOps MCP Server (Remote)
+
+Fabric IQ is `bundled`, so it can be dismissed as a special case. The **Azure DevOps MCP
+Server (Remote)** plugin cannot. Its Cowork page shows **Version 1.0.0** and an
+**Uninstall** button, meaning it went through the same publish-and-install path this plugin
+uses. It ships one MCP server plus a set of skills — structurally identical to what we
+built — and it presents a plain on/off toggle with **no Connect button**.
+
+Its MCP server is genuinely protected. Probing it anonymously:
+
+```bash
+curl -s -o /dev/null -D - -X POST https://mcp.dev.azure.com \
+  -H 'Content-Type: application/json' -d '{"jsonrpc":"2.0","id":1,"method":"initialize", ...}'
+# → HTTP/2 401
+# → www-authenticate: … resource_metadata="https://mcp.dev.azure.com/.well-known/oauth-protected-resource/"
+```
+
+So this is not an anonymous server. It is Entra-protected, exactly like Foundry MCP. The
+metadata differs in one interesting way:
+
+| | Foundry MCP | Azure DevOps MCP |
+|---|---|---|
+| Authorization server | `login.microsoftonline.com/common/v2.0` | `login.microsoftonline.com/organizations/v2.0` |
+| `scopes_supported` | `https://mcp.ai.azure.com/Foundry.Mcp.Tools` | `https://mcp.dev.azure.com/.default` |
+| `registration_endpoint` (DCR) | absent | absent |
+
+Azure DevOps advertises `.default` rather than a named custom scope. That matters because
+`.default` returns whatever the calling client has already been granted or pre-authorized
+for, which is exactly the silent path Azure MCP uses. Neither authorization server offers
+DCR, confirming again that the manifest's `DynamicClientRegistration` type is unusable
+against any Entra-protected server.
+
+**Hypothesis, not yet proven:** the Cowork host has its own first-party client that Azure
+DevOps has pre-authorized on `mcp.dev.azure.com`, so the host acquires `.default` silently
+and the author never supplies a client ID. That would make the ADO plugin the published
+counterpart of the Azure MCP registry model.
+
+If that is right, it changes the ask materially, and for the better. Rather than "add a
+`microsoftEntra` auth type", the question becomes: **which client ID does the Cowork host
+use, and can the Foundry MCP team pre-authorize it the way Azure DevOps evidently did?**
+That may need no manifest or schema change at all.
+
+It also corrects something stated earlier in this document. The claim that "there is no
+shared Cowork client to pre-authorize" holds only for the `OAuthPluginVault` path, where
+each author supplies their own client. If the ADO plugin authenticates by some other route,
+a shared host client does exist and pre-authorization becomes a general fix.
+
+**How to confirm:** the ADO plugin's manifest would settle it in one line by revealing its
+`authorization.type`. It is not public, but the Cowork plugin page fetches a definition over
+XHR, so the browser network tab should expose it — the same technique that cracked Edge 5.
+
+### Microsoft's documentation confirms the DCR dead end
+
+Worth citing when this comes up, from
+`MicrosoftDocs/azure-devops-docs`, `docs/mcp-server/remote-mcp-server.md`:
+
+> Claude Desktop, Claude Code, Codex, and Cursor require dynamic registration of an OAuth
+> client ID in Microsoft Entra ID before they can use the remote MCP Server. Microsoft
+> Entra ID doesn't currently support the dynamic client registration flow these clients
+> require.
+
+The same page lists the environments that *do* work: Visual Studio and VS Code with GitHub
+Copilot, Microsoft Copilot Studio, GitHub Copilot CLI, and the GitHub Copilot app. Every
+one is a first-party Microsoft host with an Entra client identity of its own.
+
+That is the whole picture in one sentence: **first-party hosts carry a working client
+identity, everyone else is expected to use DCR, and Entra does not support DCR.** A Cowork
+plugin author falls in the second group with the escape hatch removed, which is why
+hand-registering an application is the only route left.
+
 ### The fix
 
 An administrator (Cloud Application Administrator, Application Administrator, or Global
@@ -844,6 +914,13 @@ If P1 is not adopted, wiqd should at least offer a documented, cross-platform
 ---
 
 ## Open questions
+
+- **Which client identity does the Azure DevOps MCP plugin use?** It is published (v1.0.0,
+  uninstallable), its MCP server is Entra-protected, and it shows no Connect button. If the
+  Cowork host brokers that token with a first-party client pre-authorized by Azure DevOps,
+  then asking the Foundry team to pre-authorize the same client may resolve this with no
+  schema change. Its manifest's `authorization.type` would answer it; the plugin page's XHR
+  response is the likely place to find it.
 
 - ~~Does the GitHub/VS Code MCP host reach this server without an author-owned app?~~
   **Resolved: yes.** Adding `https://mcp.ai.azure.com` there prompted for nothing and
