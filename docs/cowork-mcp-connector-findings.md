@@ -32,10 +32,13 @@ anyone's tooling**.
 | [6](#edge-6--tenant-consent-policy-blocks-the-oauth-flow) | Author must register an Entra client against a first-party API, then chase admin consent | Connectors / Entra | P5b, P5c |
 | [7](#edge-7--smaller-things-worth-knowing) | Assorted: `--verbose` required, non-portable hooks, unenforced limits | wiqd CLI | P6, P7 |
 
-The single highest-leverage item is **P5c**: `composeExtensions` already supports
-`authType: microsoftEntra`, but `agentConnectors` does not. If it did, Edges 4 and 6 would
-not exist for any Microsoft-hosted MCP server, and no plugin author would register a
-duplicate Entra app to call a first-party API.
+The single highest-leverage item is **P5c**: connectors have no host-brokered auth option,
+so every author registers a duplicate Entra app to call a first-party API and then chases
+admin consent. Four Microsoft surfaces already avoid this — Azure CLI, Azure MCP, the
+GitHub MCP host, and Cowork's own bundled Fabric IQ plugin, which exposes two Power BI MCP
+servers behind a simple on/off toggle. The capability exists; it is just not available to
+published plugins. If it were, Edges 4 and 6 would not exist for any Microsoft-hosted MCP
+server.
 
 The most dangerous item is **Edge 5**, because the broken behaviour is the *default* and
 the failure is a 404 that looks like a server problem rather than a binding problem.
@@ -61,7 +64,9 @@ things. None of them are automated by any tool today.
    app ID, but Cowork looks it up under the *M365* app ID, producing a hard 404.
 7. **Budget for an admin-consent conversation.** In a policy-restricted tenant, users
    cannot consent to a custom API scope, and DCR is not available on Entra. Line this up
-   early — it is the one step you cannot unblock yourself.
+   early — it is the one step you cannot unblock yourself. Note that first-party bundled
+   plugins skip this entirely, so the requirement is a property of the publishing path
+   rather than of the MCP server you are calling.
 
 ---
 
@@ -554,6 +559,36 @@ not"; it is "Azure MCP was never in this position."
 The pattern across all three is the same: **the host owns the client identity and the
 author declares only a URL and a scope.** That is the design P5c asks for, and at this
 point it is the majority behaviour rather than a novel proposal.
+
+### Cowork itself already ships connectors with no auth step
+
+The three cases above are all outside Cowork, so they invite the response that Cowork is
+simply different. It is not. **Fabric IQ**, visible at
+`m365.cloud.microsoft/cowork#/customize/plugins/com.microsoft.powerbi`, is a Cowork plugin
+exposing two MCP servers — "Power BI" and "Power BI (FabricAIHub)" — and it presents an
+on/off **toggle**, not a Connect button. No OAuth flow, no consent, no vault record.
+
+Two details in its plugin page explain the difference:
+
+- **Created by Microsoft**, with a verified publisher badge.
+- **Version: `bundled`** — it does not go through the catalog and provisioning path that a
+  published plugin does. It ships with the product.
+
+So the capability plainly exists inside Cowork's connector infrastructure. A bundled
+first-party plugin can surface MCP servers that require no author-owned Entra application
+and no user consent, while a published plugin pointing at another first-party Microsoft
+MCP server must register its own client and chase an administrator.
+
+Honest caveat: the Fabric IQ manifest is not visible, so the mechanism is unconfirmed. It
+could be a pre-consented first-party application, host-brokered tokens as in the Azure MCP
+model, or the Power BI MCP accepting the caller's M365 token directly. For the purposes of
+P5c the distinction does not matter much — all three amount to *the host owns the identity*
+— but it does matter for specifying the fix, and it is the obvious question to put to the
+Cowork connector team.
+
+This reframes the ask. P5c is not a request to design and build something new. It is a
+request to expose to plugin authors a capability the product already ships and already
+demonstrates on its own plugin page.
 
 ### The fix
 
