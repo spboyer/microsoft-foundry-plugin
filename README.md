@@ -34,6 +34,8 @@ official remote Microsoft Foundry MCP connector at `https://mcp.ai.azure.com`.
   ever deleted. Guarded, so it no-ops while the app still exists.
 - `docs/cowork-mcp-connector-findings.md` - the sharp edges found while wiring
   an authenticated MCP connector into Cowork, plus proposed wiqd improvements.
+  Written for other plugin authors and as feedback for the wiqd and connectors
+  teams; it opens with a table routing each finding to its likely owner.
 - `docs/foundry/` - durable record of the deployed identifiers and Entra app
   config, which otherwise live only in gitignored `env/.env.local` and in Entra.
 

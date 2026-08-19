@@ -12,6 +12,39 @@ Last updated: 2026-08-18 — plugin v1.0.6 (connector reaches Entra consent; awa
 
 ---
 
+## If you are here from the wiqd or connectors team
+
+Start here rather than reading top to bottom. Each edge below cost real debugging time,
+and every one of them passed `validate`, `package` and `provision` silently before failing
+in the product with an unactionable message.
+
+Roughly, the split Sébastien drew in chat holds: **Edges 1–3 and 7 are tooling/docs**,
+**Edges 4–5 are the tooling/connectors boundary**, and **Edge 6 is identity and outside
+anyone's tooling**.
+
+| Edge | Problem | Likely owner | Proposal |
+|---|---|---|---|
+| [1](#edge-1--mcptooldescription-is-effectively-required-in-cowork) | `mcpToolDescription` required by Cowork, optional in schema, and wiqd docs say URL-only is fine | wiqd docs + Cowork validation | P2, P3 |
+| [2](#edge-2--a-leading--in-mcptooldescriptionfile-fails-validation) | Leading `./` in the file path fails validation, though Learn's examples use it | Manifest validator | P2 |
+| [3](#edge-3--the-packager-never-adds-the-tool-description-file-to-the-zip) | ATK packager never copies the file into the ZIP | Agents Toolkit | P1 |
+| [4](#edge-4--connector-authentication-is-entirely-un-automated) | `wiqd plugin add connector` has no auth support; OAuth is hand-authored | wiqd CLI | P4 |
+| [5](#edge-5--applicabletoapps-specificapp-binds-to-the-wrong-app-id) | Default `SpecificApp` binds the OAuth record to the Teams app ID; Cowork resolves it under the M365 app ID → hard 404 | ATK lifecycle default | P5, P5a |
+| [6](#edge-6--tenant-consent-policy-blocks-the-oauth-flow) | Author must register an Entra client against a first-party API, then chase admin consent | Connectors / Entra | P5b, P5c |
+| [7](#edge-7--smaller-things-worth-knowing) | Assorted: `--verbose` required, non-portable hooks, unenforced limits | wiqd CLI | P6, P7 |
+
+The single highest-leverage item is **P5c**: `composeExtensions` already supports
+`authType: microsoftEntra`, but `agentConnectors` does not. If it did, Edges 4 and 6 would
+not exist for any Microsoft-hosted MCP server, and no plugin author would register a
+duplicate Entra app to call a first-party API.
+
+The most dangerous item is **Edge 5**, because the broken behaviour is the *default* and
+the failure is a 404 that looks like a server problem rather than a binding problem.
+
+One caveat on scope: this is a sample size of one plugin, one tenant, one MCP server. The
+tooling gaps should generalise; the consent specifics in Edge 6 may not.
+
+---
+
 ## TL;DR for plugin authors
 
 If you are shipping a `remoteMcpServer` connector to Cowork, budget for these seven
@@ -613,6 +646,25 @@ Separately, the ATK `oauth/register` action requires `appId` even when
 `applicableToApps: AnyApp` makes it meaningless — that required-parameter check should be
 conditional.
 
+### P5b — preflight the consent story
+
+Provisioning happily creates an OAuth registration that no user in the tenant can ever
+consent to. `wiqd plugin provision` (or a `wiqd plugin doctor`) could check, and warn:
+
+- Is the requested scope's `type` `User` or `Admin` on the resource service principal?
+- Does the tenant's `authorizationPolicy` restrict self-consent to low-impact permissions?
+- Does an `oauth2PermissionGrant` already exist for this client + resource pair?
+
+All three are single Graph calls, and together they predict the "Need admin approval" wall
+*before* the author ships and asks a colleague to test. Emitting the exact
+`az ad app permission admin-consent --id <clientId>` command as remediation would turn a
+multi-day mystery into a one-line ask.
+
+Worth documenting alongside it: **`DynamicClientRegistration` is unusable against any
+Entra-protected MCP server**, because Entra exposes no RFC 7591 `registration_endpoint`.
+The Cowork docs currently recommend DCR as the alternative when API-key auth is
+unavailable, which is a dead end for the entire Microsoft first-party surface.
+
 ### P5c — ask for `microsoftEntra` auth on agent connectors
 
 The connector `authorization.type` enum is closed:
@@ -636,25 +688,6 @@ This reads as an omission rather than a deliberate restriction. Extending the co
 enum to include `microsoftEntra` would delete this document's Edges 3 and 6 outright for
 every Microsoft-hosted MCP server. Worth raising with the manifest owners; wiqd is well
 placed to carry the request since it sees the aggregate pain across authors.
-
-### P5b — preflight the consent story
-
-Provisioning happily creates an OAuth registration that no user in the tenant can ever
-consent to. `wiqd plugin provision` (or a `wiqd plugin doctor`) could check, and warn:
-
-- Is the requested scope's `type` `User` or `Admin` on the resource service principal?
-- Does the tenant's `authorizationPolicy` restrict self-consent to low-impact permissions?
-- Does an `oauth2PermissionGrant` already exist for this client + resource pair?
-
-All three are single Graph calls, and together they predict the "Need admin approval" wall
-*before* the author ships and asks a colleague to test. Emitting the exact
-`az ad app permission admin-consent --id <clientId>` command as remediation would turn a
-multi-day mystery into a one-line ask.
-
-Worth documenting alongside it: **`DynamicClientRegistration` is unusable against any
-Entra-protected MCP server**, because Entra exposes no RFC 7591 `registration_endpoint`.
-The Cowork docs currently recommend DCR as the alternative when API-key auth is
-unavailable, which is a dead end for the entire Microsoft first-party surface.
 
 ### P6 — surface real errors without `--verbose`
 Deep validation should print the underlying ATK error text by default. The truncated
